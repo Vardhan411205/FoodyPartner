@@ -5,7 +5,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Delivery Partner Registration - Mr.Foody & Ms.Foody</title>
-    <link rel="stylesheet" href="{% static 'css/login.css' %}">
     <link rel="stylesheet" href="{% static 'css/partner.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -237,6 +236,60 @@
             color: #666;
             font-size: 14px;
             opacity: 0.7;
+        }
+
+        /* Add these new logo styles */
+        .logo {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+        }
+
+        .logo img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        /* Update container styles */
+        .login-container {
+            width: 100%;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        /* Update heading styles */
+        h2 {
+            text-align: center;
+            color: #333;
+            margin: 10px 0;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+
+        /* Add responsive adjustments */
+        @media (max-width: 768px) {
+            .logo img {
+                width: 100px;
+                height: 100px;
+            }
+
+            .login-container {
+                margin: 10px;
+                padding: 15px;
+            }
         }
     </style>
 </head>

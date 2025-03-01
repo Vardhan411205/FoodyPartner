@@ -1,0 +1,83 @@
+/* Partner Registration Specific Styles */
+.partner-form {
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.form-section {
+    background: #f8f8f8;
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 25px;
+}
+
+.form-section h3 {
+    font-size: 20px;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.image-upload {
+    border: 2px dashed #ddd;
+    border-radius: 8px;
+    padding: 30px;
+    text-align: center;
+    cursor: pointer;
+}
+
+/* ... rest of registration form styles ... */
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .partner-form {
+        max-width: 90%;
+        padding: 25px;
+    }
+
+    .form-section {
+        padding: 20px;
+    }
+
+    .image-upload {
+        padding: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .partner-form {
+        max-width: 95%;
+        padding: 20px 15px;
+    }
+
+    .form-section {
+        padding: 15px;
+    }
+
+    .form-section h3 {
+        font-size: 16px;
+    }
+
+    .image-upload {
+        padding: 15px;
+    }
+
+    .image-upload h4 {
+        font-size: 15px;
+    }
+
+    .image-upload p {
+        font-size: 13px;
+    }
+}
+
+/* Form Grid Layout */
+@media (min-width: 768px) {
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+} 
