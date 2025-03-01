@@ -1,0 +1,572 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Partner Registration - Mr.Foody & Ms.Foody</title>
+    <link rel="stylesheet" href="{% static 'css/common.css' %}">
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
+    <link rel="stylesheet" href="{% static 'css/partner.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/places.js@1.19.0"></script>
+    <style>
+        #map {
+            height: 300px;
+            width: 100%;
+            margin: 10px 0;
+            border-radius: 8px;
+            border: 2px solid #ddd;
+            cursor: crosshair;
+        }
+        .location-info {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+        .coordinates {
+            font-family: monospace;
+            color: #fc8019;
+        }
+        #selected-address {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #666;
+            line-height: 1.4;
+        }
+        .map-hint {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+            font-style: italic;
+        }
+    </style>
+</head>
+
+<body class="partner-page" style="background-color: #fc8019;">
+    <a href="{% url 'joo:partner' %}" class="corner-back-btn" style="background-color: white; color: #fc8019;">
+        <i class="fas fa-arrow-left"></i> Back to Categories
+    </a>
+
+    <div class="login-container">
+        <div class="logo">
+            <img src="{% static 'img/logocopy.png' %}" alt="Mr.Foody & Ms.Foody Logo">
+        </div>
+        <div class="partner-form restaurant-form">
+            <h2>Restaurant Registration</h2>
+            <p class="subtitle">Partner with us to grow your restaurant business</p>
+
+            <form id="restaurantForm" method="POST">
+                {% csrf_token %}
+                <!-- Basic Information -->
+                <div class="form-section">
+                    <h3>Basic Information</h3>
+                    <div class="form-group">
+                        <i class="fas fa-utensils"></i>
+                        <input type="text" id="restaurant-name" placeholder="Restaurant Name" required>
+                    </div><br>
+                    <div class="form-group">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="owner-name" placeholder="Owner Name" required>
+                    </div><br>
+                    <div class="form-group email-group">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="business-email" placeholder="Business Email" required>
+                        <button type="button" id="verify-email-btn" class="verify-btn" onclick="sendOTP()">
+                            Verify
+                        </button>
+                    </div><br>
+                    <div class="form-group">
+                        <i class="fas fa-phone"></i>
+                        <input type="tel" placeholder="Contact Number" required>
+                    </div>
+                </div>
+
+                <!-- Add this after email input for OTP verification -->
+                <div id="otp-container" class="otp-container" style="display: none;">
+                    <div class="otp-inputs">
+                        <input type="text" maxlength="1" class="otp-input" data-index="1">
+                        <input type="text" maxlength="1" class="otp-input" data-index="2">
+                        <input type="text" maxlength="1" class="otp-input" data-index="3">
+                        <input type="text" maxlength="1" class="otp-input" data-index="4">
+                    </div>
+                    <button type="button" class="verify-otp-btn" onclick="verifyOTP()">Verify OTP</button>
+                </div>
+
+                <!-- Restaurant Details -->
+                <div class="form-section">
+                    <h3>Restaurant Details</h3>
+                    <div class="form-group">
+                        <i class="fas fa-tag"></i>
+                        <select id="cuisine-type" required>
+                            <option value="">Select Cuisine Type</option>
+                            <option value="chinese">Chinese</option>
+                            <option value="indian">Indian</option>
+                            <option value="italian">Italian</option>
+                            <option value="mexican">Mexican</option>
+                            <option value="japanese">Japanese</option>
+                            <option value="thai">Thai</option>
+                            <option value="mediterranean">Mediterranean</option>
+                            <option value="american">American</option>
+                            <option value="fusion">Fusion</option>
+                        </select>
+                    </div><br>
+
+                    <!-- Location Section -->
+                    <div class="form-section">
+                        <h3>Location</h3>
+                        <div class="map-hint">
+                            <i class="fas fa-info-circle"></i> 
+                            Click on the map to select location or use the search box below
+                        </div>
+                        <div id="map"></div>
+                        <p id="selected-address"></p>
+                        <input type="hidden" id="latitude" name="latitude">
+                        <input type="hidden" id="longitude" name="longitude">
+                        <input type="hidden" id="formatted-address" name="formatted_address">
+                        <div class="form-group">
+                            <label for="location">Restaurant Location</label>
+                            <input 
+                                type="search" 
+                                id="location-input" 
+                                name="location" 
+                                placeholder="Enter your restaurant location"
+                                required
+                            >
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Restaurant Image -->
+                <div class="form-section">
+                    <h3>Restaurant Image</h3>
+                    <div class="form-group">
+                        <i class="fas fa-image"></i>
+                        <input type="url" id="restaurant-image" name="restaurant_image" 
+                               placeholder="Enter Restaurant Image URL" required>
+                    </div>
+                </div>
+
+                <!-- Account Security -->
+                <div class="form-section">
+                    <h3>Account Security</h3>
+                    <br>
+                    <div class="form-group">
+                        <i class="fas fa-key"></i>
+                        <input type="password" id="password" placeholder="Create Password" required>
+                        <span class="toggle-password" onclick="togglePassword('password', this)" tabindex="0">
+                            <i class="far fa-eye-slash"></i>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Add this before the submit button in the form -->
+                <div class="terms-checkbox">
+                    <label>
+                        <input type="checkbox" id="termsCheckbox" required>
+                        <span>I agree to the <a href="{% url 'joo:terms_conditions' %}" target="_blank">Terms & Conditions</a></span>
+                    </label>
+                </div>
+                <button type="submit" class="login-btn" disabled>Register Restaurant</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function togglePassword(inputId, element) {
+            const passwordInput = document.getElementById(inputId);
+            const icon = element.querySelector('i');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            }
+        }
+
+        function sendOTP() {
+            const email = document.getElementById('business-email').value;
+            if (!email) {
+                alert('Please enter email address');
+                return;
+            }
+
+            document.getElementById('otp-container').style.display = 'block';
+            
+            const verifyBtn = document.getElementById('verify-email-btn');
+            verifyBtn.disabled = true;
+            verifyBtn.textContent = 'Sending...';
+
+            fetch('{% url "joo:send_otp" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ 
+                    email: email
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    verifyBtn.textContent = 'Verify';
+                    verifyBtn.disabled = false;
+                    alert('OTP sent successfully! Please check your email.');
+                } else {
+                    alert('Error sending OTP: ' + data.message);
+                    verifyBtn.textContent = 'Verify';
+                    verifyBtn.disabled = false;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error sending OTP. Please try again.');
+                verifyBtn.textContent = 'Verify';
+                verifyBtn.disabled = false;
+            });
+        }
+
+        function verifyOTP() {
+            const email = document.getElementById('business-email').value;
+            const otpInputs = document.querySelectorAll('.otp-input');
+            let otp = '';
+            otpInputs.forEach(input => {
+                otp += input.value;
+            });
+
+            if (otp.length !== 4) {
+                alert('Please enter complete OTP');
+                return;
+            }
+
+            fetch('{% url "joo:verify_otp" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ 
+                    email: email,
+                    otp: otp
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    document.getElementById('otp-container').style.display = 'none';
+                    const verifyBtn = document.getElementById('verify-email-btn');
+                    verifyBtn.textContent = 'Verified';
+                    verifyBtn.classList.add('verified');
+                    verifyBtn.disabled = true;
+                    document.querySelector('form button[type="submit"]').disabled = false;
+                    alert('Email verified successfully!');
+                } else {
+                    alert('Invalid OTP. Please try again.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error verifying OTP. Please try again.');
+            });
+        }
+
+        // Auto-focus next OTP input
+        document.querySelectorAll('.otp-input').forEach(input => {
+            input.addEventListener('input', function() {
+                this.value = this.value.replace(/[^0-9]/g, ''); // Only allow numbers
+                if (this.value.length === 1) {
+                    const nextInput = document.querySelector(`.otp-input[data-index="${parseInt(this.dataset.index) + 1}"]`);
+                    if (nextInput) nextInput.focus();
+                }
+            });
+
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Backspace' && !this.value) {
+                    const prevInput = document.querySelector(`.otp-input[data-index="${parseInt(this.dataset.index) - 1}"]`);
+                    if (prevInput) prevInput.focus();
+                }
+            });
+        });
+
+        document.querySelector('form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            if (!document.getElementById('verify-email-btn').classList.contains('verified')) {
+                alert('Please verify your email first');
+                return;
+            }
+
+            if (!document.getElementById('termsCheckbox').checked) {
+                alert('Please agree to the Terms & Conditions');
+                return;
+            }
+
+            // Update the form submission data
+            const jsonData = {
+                restaurant_name: document.getElementById('restaurant-name').value,
+                owner_name: document.getElementById('owner-name').value,
+                email: document.getElementById('business-email').value,
+                phone: document.querySelector('input[placeholder="Contact Number"]').value,
+                cuisine_type: document.getElementById('cuisine-type').value,
+                address: document.getElementById('formatted-address').value,
+                restaurant_image: document.getElementById('restaurant-image').value,
+                password: document.getElementById('password').value
+            };
+
+            try {
+                const response = await fetch('{% url "joo:register_restaurant_partner" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify(jsonData)
+                });
+
+                const data = await response.json();
+                if (data.status === 'success') {
+                    alert('Registration successful! You can now login.');
+                    window.location.href = '{% url "joo:restaurant_login" %}';
+                } else {
+                    alert('Registration failed: ' + data.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error during registration. Please try again.');
+            }
+        });
+
+        // Map initialization and location functionality
+        let map;
+        let marker;
+
+        function initMap() {
+            map = L.map('map').setView([0, 0], 2);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+            
+            // Add geocoder control
+            const geocoder = L.Control.geocoder({
+                defaultMarkGeocode: false
+            })
+            .on('markgeocode', function(e) {
+                const latlng = e.geocode.center;
+                updateLocation(latlng);
+                map.setView(latlng, 16);
+            })
+            .addTo(map);
+
+            // Add click event to map
+            map.on('click', function(e) {
+                const latlng = {
+                    lat: e.latlng.lat,
+                    lng: e.latlng.lng
+                };
+                updateLocation(latlng);
+            });
+
+            // Try to get user's current location
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    position => {
+                        const latlng = {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude
+                        };
+                        updateLocation(latlng);
+                        map.setView(latlng, 13);
+                    },
+                    error => {
+                        console.log('Error getting location:', error);
+                        // Default view of map (you can set to your city's coordinates)
+                        map.setView([20.5937, 78.9629], 5); // India center
+                    }
+                );
+            }
+        }
+
+        function updateLocation(latlng) {
+            if (marker) {
+                map.removeLayer(marker);
+            }
+            marker = L.marker(latlng).addTo(map);
+            
+            // Update hidden inputs
+            document.getElementById('latitude').value = latlng.lat;
+            document.getElementById('longitude').value = latlng.lng;
+            
+            // Show loading state
+            document.getElementById('selected-address').textContent = 'Getting address...';
+            
+            // Reverse geocode to get address
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latlng.lat}&lon=${latlng.lng}`)
+                .then(response => response.json())
+                .then(data => {
+                    const address = data.display_name;
+                    document.getElementById('selected-address').textContent = `Selected Location: ${address}`;
+                    document.getElementById('formatted-address').value = address;
+                    document.getElementById('location-input').value = address;
+                })
+                .catch(error => {
+                    console.error('Error getting address:', error);
+                    document.getElementById('selected-address').textContent = 
+                        `Selected coordinates: ${latlng.lat.toFixed(6)}, ${latlng.lng.toFixed(6)}`;
+                });
+        }
+
+        // Initialize map when page loads
+        window.onload = initMap;
+
+        // Initialize Algolia Places
+        var placesAutocomplete = places({
+            appId: 'plUPM4GQNQQ0',
+            apiKey: '2bc132ed78b80052d4694df04804f449',
+            container: document.querySelector('#location-input'),
+            templates: {
+                value: function(suggestion) {
+                    return suggestion.name;
+                }
+            }
+        }).configure({
+            type: 'address',
+            language: 'en'
+        });
+
+        // Handle location selection
+        placesAutocomplete.on('change', function(e) {
+            document.querySelector('#latitude').value = e.suggestion.latlng.lat;
+            document.querySelector('#longitude').value = e.suggestion.latlng.lng;
+        });
+
+        // Handle form submission
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const lat = document.querySelector('#latitude').value;
+            const lng = document.querySelector('#longitude').value;
+            
+            if (!lat || !lng) {
+                e.preventDefault();
+                alert('Please select a valid location from the dropdown');
+            }
+        });
+    </script>
+
+    <!-- Add these styles -->
+    <style>
+        .email-group {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .verify-btn {
+            position: absolute;
+            right: 10px;
+            padding: 8px 15px;
+            background-color: #fc8019;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+
+        .verify-btn:hover {
+            background-color: #e67215;
+        }
+
+        .verify-btn.verified {
+            background-color: #28a745;
+            cursor: default;
+        }
+
+        .otp-container {
+            margin-top: 15px;
+        }
+
+        .otp-inputs {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        .otp-input {
+            width: 45px;
+            height: 45px;
+            text-align: center;
+            font-size: 18px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            background: white;
+        }
+
+        .otp-input:focus {
+            border-color: #fc8019;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(252, 128, 25, 0.1);
+        }
+
+        .verify-otp-btn {
+            width: 100%;
+            padding: 10px;
+            background-color: #fc8019;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+
+        .verify-otp-btn:hover {
+            background-color: #e67215;
+        }
+
+        .terms-checkbox {
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .terms-checkbox label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .terms-checkbox input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
+        .terms-checkbox a {
+            color: #fc8019;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .terms-checkbox a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</body>
+
+</html>

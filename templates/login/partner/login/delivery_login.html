@@ -1,0 +1,368 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delivery Partner Login - Mr.Foody & Ms.Foody</title>
+    <link rel="stylesheet" href="{% static 'css/common.css' %}">
+    <link rel="stylesheet" href="{% static 'css/partner/auth.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Main container styles */
+        .auth-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            max-width: 450px;
+            width: 90%;
+            margin: 40px auto;
+        }
+
+        /* Logo styles */
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo img {
+            max-width: 180px;
+            height: auto;
+        }
+
+        /* Form header styles */
+        .auth-form h2 {
+            color: #333;
+            font-size: 28px;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+
+        /* Form group styles */
+        .form-group {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 15px 40px 15px 45px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            border-color: #fc8019;
+            box-shadow: 0 0 0 2px rgba(252, 128, 25, 0.1);
+            outline: none;
+        }
+
+        /* Icon styles */
+        .form-group i.fas {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+            font-size: 18px;
+        }
+
+        /* Password toggle styles */
+        .toggle-password {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #666;
+            padding: 5px;
+            z-index: 2;
+        }
+
+        .toggle-password:hover {
+            color: #fc8019;
+        }
+
+        /* Form options styles */
+        .form-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 20px 0;
+        }
+
+        .remember-me {
+            display: flex;
+            align-items: center;
+        }
+
+        .remember-me label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .remember-me input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            margin-right: 8px;
+            cursor: pointer;
+        }
+
+        .remember-me span {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .forgot-password {
+            color: #fc8019;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s;
+        }
+
+        .forgot-password:hover {
+            color: #e67215;
+            text-decoration: underline;
+        }
+
+        /* Button styles */
+        .auth-btn {
+            width: 100%;
+            padding: 15px;
+            background: #fc8019;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .auth-btn:hover {
+            background: #e67215;
+        }
+
+        .auth-btn:active {
+            transform: translateY(1px);
+        }
+
+        /* Auth links styles */
+        .auth-links {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .auth-links a {
+            color: #fc8019;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s;
+        }
+
+        .auth-links a:hover {
+            color: #e67215;
+            text-decoration: underline;
+        }
+
+        /* Alert styles */
+        .alert {
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .alert-error {
+            background-color: #fee;
+            border: 1px solid #fcc;
+            color: #c00;
+        }
+
+        /* Update back button styles */
+        .corner-back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 25px;
+            background: #fff;
+            color: #333;
+            text-decoration: none;
+            border-radius: 25px;
+            font-size: 15px;
+            font-weight: 500;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .corner-back-btn i {
+            font-size: 16px;
+            color: #333;
+        }
+
+        .corner-back-btn:hover {
+            background: #f8f8f8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .corner-back-btn {
+                top: 15px;
+                left: 15px;
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+        }
+
+        /* Make sure the button text is white on orange background */
+        .partner-auth-page .corner-back-btn {
+            background: #fff;
+            color: #fc8019;
+        }
+
+        .partner-auth-page .corner-back-btn i {
+            color: #fc8019;
+        }
+
+        .partner-auth-page .corner-back-btn:hover {
+            background: #fff3ec;
+        }
+    </style>
+</head>
+
+<body class="partner-auth-page">
+    <a href="{% url 'joo:partner' %}" class="corner-back-btn">
+        <i class="fas fa-arrow-left"></i> Back to Partner
+    </a>
+
+    <div class="auth-container">
+        <div class="logo">
+            <img src="{% static 'img/logocopy.png' %}" alt="Mr.Foody & Ms.Foody Logo">
+        </div>
+
+        <div class="auth-form">
+            <h2>Delivery Partner Login</h2>
+            <p class="subtitle">Welcome back, partner!</p>
+
+            <!-- Alert message container -->
+            <div class="alert" style="display: none;">
+                <!-- Alert messages will be dynamically added here -->
+            </div>
+
+            <form id="loginForm" method="POST">
+                {% csrf_token %}
+                <div class="form-group">
+                    <i class="fas fa-envelope"></i>
+                    <input type="email" name="email" id="email" placeholder="Email Address" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="password" name="password" placeholder="Password" required>
+                    <span class="toggle-password" onclick="togglePassword('password', this)" tabindex="0">
+                    </span>
+                </div>
+                <div class="form-options">
+                    <div class="remember-me">
+                        <label>
+                            <input type="checkbox">
+                            <span>Remember me</span>
+                        </label>
+                    </div>
+                    <a href="{% url 'joo:forgot_password' %}" class="forgot-password">Forgot Password?</a>
+                </div>
+                <button type="submit" class="auth-btn">Login</button>
+            </form>
+
+            <div class="auth-links">
+                <a href="{% url 'joo:delivery' %}">Not registered yet? Sign up here</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Toggle password visibility
+        function togglePassword(inputId, element) {
+            const passwordInput = document.getElementById(inputId);
+            const icon = element.querySelector('i');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            }
+        }
+
+        // Form submission
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const alertDiv = document.querySelector('.alert');
+            const submitBtn = this.querySelector('button[type="submit"]');
+            
+            try {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Logging in...';
+                
+                const formData = new FormData(this);
+
+                const response = await fetch('{% url "joo:delivery_login" %}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: formData
+                });
+
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    alertDiv.style.display = 'block';
+                    alertDiv.className = 'alert alert-success';
+                    alertDiv.innerHTML = '<p>Login successful! Redirecting...</p>';
+                    
+                    window.location.href = data.redirect_url;
+                } else {
+                    throw new Error(data.message || 'Invalid credentials');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alertDiv.style.display = 'block';
+                alertDiv.className = 'alert alert-error';
+                alertDiv.innerHTML = `<p class="error">${error.message}</p>`;
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Login';
+            }
+        });
+    </script>
+
+    <!-- Keep the same styles as restaurant_login.html -->
+    <style>
+        /* ... copy the styles from restaurant_login.html ... */
+    </style>
+</body>
+
+</html>

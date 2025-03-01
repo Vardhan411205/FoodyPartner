@@ -1,0 +1,488 @@
+/* CSS Reset */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', Arial, sans-serif;
+}
+
+
+/* Common Profile Styles */
+
+.profile-page {
+    background: #f8f8f8;
+    min-height: 100vh;
+}
+
+
+/* Favorites Page Styles */
+
+.favorites-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.category-filters {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.filter-btn {
+    padding: 8px 20px;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    background: white;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.filter-btn.active {
+    background: #fc8019;
+    color: white;
+    border-color: #fc8019;
+}
+
+.favorites-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.favorite-card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.3s ease;
+}
+
+.favorite-card:hover {
+    transform: translateY(-5px);
+}
+
+.favorite-header {
+    position: relative;
+}
+
+.favorite-header img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+}
+
+.remove-favorite {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: white;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.remove-favorite i {
+    color: #fc8019;
+    font-size: 16px;
+}
+
+.favorite-content {
+    padding: 15px;
+}
+
+.favorite-content h3 {
+    margin: 0 0 10px;
+    font-size: 18px;
+    color: #333;
+}
+
+.restaurant-info,
+.dish-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.cuisine,
+.restaurant {
+    color: #666;
+    font-size: 14px;
+}
+
+.rating {
+    color: #fc8019;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.location,
+.description {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 15px;
+}
+
+.price {
+    color: #333;
+    font-weight: 500;
+}
+
+.order-btn {
+    width: 100%;
+    padding: 10px;
+    background: #fc8019;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.order-btn:hover {
+    background: #e67312;
+}
+
+
+/* Empty State */
+
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.empty-state img {
+    width: 200px;
+    margin-bottom: 20px;
+}
+
+.empty-state h3 {
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.empty-state p {
+    color: #666;
+    margin-bottom: 20px;
+}
+
+.browse-btn {
+    padding: 10px 30px;
+    background: #fc8019;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: background 0.3s ease;
+}
+
+.browse-btn:hover {
+    background: #e67312;
+}
+
+
+/* Animation */
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+
+/* Responsive Design */
+
+@media (max-width: 768px) {
+    .favorites-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .favorites-grid {
+        grid-template-columns: 1fr;
+    }
+    .category-filters {
+        overflow-x: auto;
+        padding-bottom: 10px;
+    }
+    .filter-btn {
+        white-space: nowrap;
+    }
+}
+
+
+/* Address Page Styles */
+
+.addresses-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.add-address-section {
+    margin-bottom: 20px;
+}
+
+.address-card {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.address-type {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    color: #fc8019;
+}
+
+.address-details {
+    margin-bottom: 15px;
+}
+
+.address-text {
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.locality {
+    color: #666;
+    font-size: 14px;
+}
+
+.address-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.edit-btn,
+.delete-btn {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 14px;
+}
+
+.edit-btn {
+    background: #f0f0f0;
+    color: #333;
+}
+
+.delete-btn {
+    background: #fff0f0;
+    color: #ff4757;
+}
+
+
+/* Address Modal Styles */
+
+.address-type-selector {
+    display: flex;
+    gap: 20px;
+    margin-top: 10px;
+}
+
+.type-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+}
+
+.type-option input[type="radio"] {
+    display: none;
+}
+
+.type-option i {
+    font-size: 24px;
+    color: #666;
+    transition: color 0.3s ease;
+}
+
+.type-option input[type="radio"]:checked+i {
+    color: #fc8019;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+
+/* Responsive Design */
+
+@media (max-width: 480px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    .address-actions {
+        flex-direction: column;
+    }
+    .edit-btn,
+    .delete-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+
+/* Add these styles for header positioning */
+
+header {
+    position: relative;
+}
+
+.header-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+}
+
+.page-title {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    color: white;
+}
+
+.page-title h1 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 500;
+}
+
+
+/* Profile Icon and Dropdown Styles */
+
+.profile-icon {
+    position: relative;
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.profile-icon i {
+    color: white;
+    font-size: 20px;
+}
+
+.profile-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: 250px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+    z-index: 1002;
+    margin-top: 10px;
+}
+
+.profile-icon:hover .profile-dropdown {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+
+/* Arrow pointer */
+
+.profile-dropdown::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    right: 16px;
+    width: 12px;
+    height: 12px;
+    background: white;
+    transform: rotate(45deg);
+}
+
+.profile-header {
+    padding: 16px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.profile-header i {
+    display: none;
+    /* Hide the user circle icon */
+}
+
+.profile-header span {
+    color: #333;
+    font-size: 15px;
+}
+
+.profile-menu {
+    list-style: none;
+    padding: 8px 0;
+    margin: 0;
+}
+
+.profile-menu li a {
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #333;
+    text-decoration: none;
+    transition: background 0.2s;
+}
+
+.profile-menu li a:hover {
+    background: #f8f8f8;
+}
+
+.profile-menu li a i {
+    font-size: 18px;
+    color: #fc8019;
+    /* Orange color for all icons */
+    width: 20px;
+    text-align: center;
+}
+
+.profile-menu .logout {
+    color: #ff5252;
+}
+
+.profile-menu .logout i {
+    color: #ff5252;
+}

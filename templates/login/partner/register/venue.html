@@ -1,0 +1,631 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Venue Partner Registration - Mr.Foody & Ms.Foody</title>
+    <link rel="stylesheet" href="{% static 'css/common.css' %}">
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
+    <link rel="stylesheet" href="{% static 'css/partner.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/places.js@1.19.0"></script>
+    <style>
+        #map {
+            height: 400px;
+            width: 100%;
+            margin: 10px 0;
+            border-radius: 8px;
+            border: 2px solid #fc8019;
+            cursor: crosshair !important;
+            position: relative;
+        }
+        .map-help {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            z-index: 1000;
+        }
+        #selected-address {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .location-input-container {
+            position: relative;
+            margin-top: 15px;
+        }
+        #location-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        #location-input:focus {
+            border-color: #fc8019;
+            box-shadow: 0 0 0 2px rgba(252, 128, 25, 0.1);
+        }
+        .location-info {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+        .coordinates {
+            font-family: monospace;
+            color: #fc8019;
+        }
+        .success-message {
+            color: #28a745;
+            margin-top: 5px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .success-message::before {
+            content: '✓';
+            font-weight: bold;
+        }
+        .verify-btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #fc8019;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .verify-btn:disabled {
+            background: #ccc;
+        }
+        .verify-btn.verified {
+            background: #28a745;
+        }
+        .otp-container {
+            margin-top: 15px;
+        }
+        .otp-inputs {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+        .otp-input {
+            width: 40px;
+            height: 40px;
+            text-align: center;
+            font-size: 18px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+        }
+        .verify-otp-btn {
+            width: 100%;
+            padding: 10px;
+            background: #fc8019;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .verify-otp-btn:disabled {
+            background: #ccc;
+        }
+        .terms-checkbox {
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+        }
+        .terms-checkbox label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            color: #666;
+            font-size: 14px;
+        }
+        .terms-checkbox input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+        .terms-checkbox a {
+            color: #fc8019;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .terms-checkbox a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body class="partner-page" style="background-color: #fc8019">
+    <a href="{% url 'joo:partner' %}" class="corner-back-btn" style="background-color: white;color: #fc8019;">
+        <i class="fas fa-arrow-left"></i> Back to Categories
+    </a>
+
+    <div class="login-container">
+        <div class="logo">
+            <img src="{% static 'img/logocopy.png' %}" alt="Mr.Foody & Ms.Foody Logo">
+        </div>
+        <div class="partner-form venue-form">
+            <h2>Venue Registration</h2>
+            <p class="subtitle">Partner with us for venue bookings</p>
+
+            <form id="venueForm" method="POST">
+                {% csrf_token %}
+                <!-- Basic Information -->
+                <div class="form-section">
+                    <h3>Basic Information</h3>
+                    <div class="form-group">
+                        <i class="fas fa-building"></i>
+                        <input type="text" id="venue-name" placeholder="Venue Name" required>
+                    </div><br>
+                    <div class="form-group">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="owner-name" placeholder="Owner Name" required>
+                    </div><br>
+                    <div class="form-group email-group">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="business-email" name="email" placeholder="Business Email" required>
+                        <button type="button" id="verify-email-btn" class="verify-btn" onclick="sendOTP()">Verify</button>
+                    </div>
+                    <input type="hidden" id="email_verified" name="email_verified" value="false">
+                    <div id="otp-container" class="otp-container" style="display: none;">
+                        <div class="otp-inputs">
+                            <input type="text" class="otp-input" maxlength="1" data-index="1">
+                            <input type="text" class="otp-input" maxlength="1" data-index="2">
+                            <input type="text" class="otp-input" maxlength="1" data-index="3">
+                            <input type="text" class="otp-input" maxlength="1" data-index="4">
+                        </div>
+                        <button type="button" class="verify-otp-btn" onclick="verifyOTP()">Verify OTP</button>
+                    </div>
+                    <div class="form-group">
+                        <i class="fas fa-phone"></i>
+                        <input type="tel" id="phone" placeholder="Contact Number" required>
+                    </div>
+                </div>
+
+                <!-- Venue Details -->
+                <div class="form-section">
+                    <h3>Venue Details</h3>
+                    <div class="form-group">
+                        <i class="fas fa-tag"></i>
+                        <select id="venue-type" required>
+                            <option value="">Select Venue Type</option>
+                            <option value="banquet">Banquet hall</option>
+                            <option value="wedding">Wedding venue</option>
+                            <option value="conference">Conference hall</option>
+                            <option value="party">Party hall</option>
+                            <option value="outdoor">Outdoor hall</option>
+                            <option value="heritage">Heritage venue</option>
+                            <option value="roff_top">Roff top</option>
+                            <option value="beach">Beach venue</option>
+                            <option value="corporate">Corporate venues</option>
+                            <option value="eco">Eco venue</option>
+                            <option value="cultural">Cultural venue</option>
+                            <option value="sports">Sports venue</option>
+                        </select>
+                    </div><br>
+                    <div class="form-group">
+                        <i class="fas fa-users"></i>
+                        <input type="number" id="seating-capacity" placeholder="Seating Capacity" required>
+                    </div><br>
+                    <div class="form-section">
+                        <h3>Location</h3>
+                        <br>
+                        <div id="map" style="height: 300px;"></div>
+                        <p id="selected-address"></p>
+                        <!-- Hidden inputs for coordinates and address -->
+                        <input type="hidden" id="latitude" name="latitude">
+                        <input type="hidden" id="longitude" name="longitude">
+                        <input type="hidden" id="formatted-address" name="formatted_address">
+                        <div class="form-group">
+                            <label for="location">Location</label>
+                            <input 
+                                type="search" 
+                                id="location-input" 
+                                name="location" 
+                                placeholder="Enter your venue location"
+                                required
+                            >
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Venue Image -->
+                <div class="form-section">
+                    <h3>Venue Image</h3>
+                    <div class="form-group">
+                        <i class="fas fa-image"></i>
+                        <input type="url" id="venue-image" name="venue_image_url" placeholder="Enter Venue Image URL" required>
+                    </div>
+                </div>
+
+                <!-- Account Security -->
+                <div class="form-section">
+                    <h3>Account Security</h3>
+                    <br>
+                    <div class="form-group">
+                        <i class="fas fa-key"></i>
+                        <input type="password" id="password" placeholder="Create Password" required>
+                        <span class="toggle-password" onclick="togglePassword('password', this)">
+                            <i class="far fa-eye-slash"></i>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Add this before the submit button in the form -->
+                <div class="terms-checkbox">
+                    <label>
+                        <input type="checkbox" id="termsCheckbox" required>
+                        <span>I agree to the <a href="{% url 'joo:terms_conditions' %}" target="_blank">Terms & Conditions</a></span>
+                    </label>
+                </div>
+                <button type="submit" class="login-btn" disabled>Register Venue</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        function togglePassword(inputId, element) {
+            const passwordInput = document.getElementById(inputId);
+            const icon = element.querySelector('i');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            }
+        }
+
+        function sendOTP() {
+            const email = document.getElementById('business-email').value;
+            if (!email) {
+                alert('Please enter your email address');
+                return;
+            }
+
+            // Show loading state
+            const verifyBtn = document.getElementById('verify-email-btn');
+            verifyBtn.disabled = true;
+            verifyBtn.textContent = 'Sending...';
+
+            fetch('{% url "joo:send_otp" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ 
+                    email: email
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                verifyBtn.disabled = false;
+                verifyBtn.textContent = 'Verify';
+                
+                if (data.status === 'success') {
+                    document.getElementById('otp-container').style.display = 'block';
+                    alert('OTP sent successfully! Please check your email.');
+                } else {
+                    throw new Error(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                verifyBtn.disabled = false;
+                verifyBtn.textContent = 'Verify';
+                alert('Error sending OTP: ' + error.message);
+            });
+        }
+
+        function verifyOTP() {
+            const email = document.getElementById('business-email').value;
+            const otpInputs = document.querySelectorAll('.otp-input');
+            const otp = Array.from(otpInputs).map(input => input.value).join('');
+
+            if (!email || !otp) {
+                alert('Please enter both email and OTP');
+                return;
+            }
+
+            const verifyOTPBtn = document.querySelector('.verify-otp-btn');
+            verifyOTPBtn.disabled = true;
+            verifyOTPBtn.textContent = 'Verifying...';
+
+            fetch('{% url "joo:verify_otp" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
+                    email: email,
+                    otp: otp
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                verifyOTPBtn.disabled = false;
+                verifyOTPBtn.textContent = 'Verify OTP';
+                
+                if (data.status === 'success') {
+                    // Hide OTP container
+                    document.getElementById('otp-container').style.display = 'none';
+                    
+                    // Update verify button
+                    const verifyBtn = document.getElementById('verify-email-btn');
+                    verifyBtn.textContent = 'Verified';
+                    verifyBtn.classList.add('verified');
+                    verifyBtn.disabled = true;
+                    
+                    // Make email field readonly
+                    document.getElementById('business-email').readOnly = true;
+                    
+                    // Update register button state
+                    updateRegisterButton();
+                    
+                    alert('Email verified successfully!');
+                } else {
+                    throw new Error(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                verifyOTPBtn.disabled = false;
+                verifyOTPBtn.textContent = 'Verify OTP';
+                alert('Error verifying OTP: ' + error.message);
+            });
+        }
+
+        // Auto-focus next OTP input
+        document.querySelectorAll('.otp-input').forEach(input => {
+            input.addEventListener('input', function() {
+                this.value = this.value.replace(/[^0-9]/g, ''); // Only allow numbers
+                if (this.value.length === 1) {
+                    const nextInput = document.querySelector(`.otp-input[data-index="${parseInt(this.dataset.index) + 1}"]`);
+                    if (nextInput) nextInput.focus();
+                }
+            });
+
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Backspace' && !this.value) {
+                    const prevInput = document.querySelector(`.otp-input[data-index="${parseInt(this.dataset.index) - 1}"]`);
+                    if (prevInput) prevInput.focus();
+                }
+            });
+        });
+
+        document.getElementById('venueForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            try {
+                // Get the address from the location input
+                const address = document.getElementById('location-input').value;
+                
+                const formData = {
+                    venue_name: document.getElementById('venue-name').value,
+                    owner_name: document.getElementById('owner-name').value,
+                    email: document.getElementById('business-email').value,
+                    phone: document.getElementById('phone').value,
+                    venue_type: document.getElementById('venue-type').value,
+                    seating_capacity: parseInt(document.getElementById('seating-capacity').value),
+                    address: address, // Add the address from location input
+                    venue_image: document.getElementById('venue-image')?.value || '',
+                    password: document.getElementById('password').value
+                };
+
+                // Validate required fields
+                for (const [key, value] of Object.entries(formData)) {
+                    if (!value && key !== 'venue_image') {  // venue_image is optional
+                        alert(`Please fill in ${key.replace(/_/g, ' ')}`);
+                        return;
+                    }
+                }
+
+                console.log('Submitting form data:', formData); // Debug log
+
+                const response = await fetch('{% url "joo:register_venue_partner" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+                console.log('Server response:', data); // Debug log
+
+                if (data.status === 'success') {
+                    alert('Registration successful! You can now login.');
+                    window.location.href = '{% url "joo:venue_login" %}';
+                } else {
+                    throw new Error(data.message || 'Registration failed');
+                }
+            } catch (error) {
+                console.error('Error during registration:', error);
+                alert(error.message || 'Error during registration. Please try again.');
+            }
+        });
+
+        // Replace the existing map initialization and location code with this:
+
+        let map, marker;
+
+        function initMap() {
+            console.log('Initializing map...');
+            
+            // Initialize with default coordinates (Chennai)
+            const defaultLat = 13.0827;
+            const defaultLng = 80.2707;
+            
+            // Create map with double-click zoom disabled
+            map = L.map('map', {
+                doubleClickZoom: false,
+                zoomControl: true,
+                tap: false  // Disable tap behavior for mobile
+            }).setView([defaultLat, defaultLng], 13);
+            
+            // Add map tiles
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+
+            // Add click handler to map
+            map.on('click', function(e) {
+                console.log('Map clicked at:', e.latlng);
+                handleLocationSelect(e.latlng);
+            });
+
+            // Add help message
+            const helpDiv = L.DomUtil.create('div', 'map-help');
+            helpDiv.innerHTML = 'Click anywhere on the map to select location';
+            map.getContainer().appendChild(helpDiv);
+        }
+
+        function handleLocationSelect(latlng) {
+            console.log('Handling location selection:', latlng);
+
+            // Remove existing marker
+            if (marker) {
+                map.removeLayer(marker);
+            }
+
+            // Create new marker
+            marker = L.marker(latlng, {
+                draggable: true
+            }).addTo(map);
+
+            // Update form inputs
+            document.getElementById('latitude').value = latlng.lat;
+            document.getElementById('longitude').value = latlng.lng;
+
+            // Show loading state
+            const locationInput = document.getElementById('location-input');
+            const selectedAddress = document.getElementById('selected-address');
+            
+            locationInput.value = 'Fetching address...';
+            selectedAddress.textContent = '📍 Getting address...';
+            locationInput.style.backgroundColor = '#fff9c4';
+
+            // Handle marker drag
+            marker.on('dragend', function() {
+                const newPos = marker.getLatLng();
+                console.log('Marker dragged to:', newPos);
+                handleLocationSelect(newPos);
+            });
+
+            // Get address from coordinates
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latlng.lat}&lon=${latlng.lng}`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Received address:', data);
+                    const address = data.display_name;
+                    
+                    // Update UI with address
+                    selectedAddress.innerHTML = `<strong>📍 Selected Location:</strong><br>${address}`;
+                    document.getElementById('formatted-address').value = address;
+                    locationInput.value = address;
+                    
+                    // Show success feedback
+                    locationInput.style.backgroundColor = '#e8f5e9';
+                    setTimeout(() => {
+                        locationInput.style.backgroundColor = '';
+                    }, 1000);
+                })
+                .catch(error => {
+                    console.error('Error getting address:', error);
+                    const coords = `${latlng.lat.toFixed(6)}, ${latlng.lng.toFixed(6)}`;
+                    
+                    // Update UI with coordinates as fallback
+                    selectedAddress.innerHTML = `<strong>📍 Selected Coordinates:</strong><br>${coords}`;
+                    locationInput.value = coords;
+                    
+                    // Show error feedback
+                    locationInput.style.backgroundColor = '#ffebee';
+                    setTimeout(() => {
+                        locationInput.style.backgroundColor = '';
+                    }, 1000);
+                });
+        }
+
+        // Initialize map when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Page loaded, initializing map...');
+            initMap();
+        });
+
+        // Handle location search
+        document.getElementById('location-input').addEventListener('input', function(e) {
+            const query = e.target.value;
+            if (query.length > 2) { // Search only if more than 2 characters
+                fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data && data.length > 0) {
+                            const location = data[0];
+                            const latlng = L.latLng(location.lat, location.lon);
+                            map.setView(latlng, 16);
+                            handleLocationSelect(latlng);
+                        }
+                    })
+                    .catch(error => console.error('Error searching location:', error));
+            }
+        });
+
+        // Add this after your existing JavaScript code
+        function updateRegisterButton() {
+            const emailVerified = document.getElementById('verify-email-btn').classList.contains('verified');
+            const termsAccepted = document.getElementById('termsCheckbox').checked;
+            const registerButton = document.querySelector('.login-btn');
+            
+            registerButton.disabled = !(emailVerified && termsAccepted);
+        }
+
+        // Add event listener for terms checkbox
+        document.getElementById('termsCheckbox').addEventListener('change', updateRegisterButton);
+    </script>
+</body>
+
+</html>

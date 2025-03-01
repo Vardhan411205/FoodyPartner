@@ -1,0 +1,573 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delivery Partner Registration - Mr.Foody & Ms.Foody</title>
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
+    <link rel="stylesheet" href="{% static 'css/partner.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body{
+            background: #fc8019;
+        }
+        .form-group {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            padding-left: 35px; /* Space for left icon */
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        /* Left icons (email, key, etc.) */
+        .form-group i:not(.toggle-password) {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+            font-size: 14px;
+            opacity: 0.7;
+        }
+
+        /* Password fields */
+        .form-group input[type="password"] {
+            padding-right: 40px; /* Space for eye icon */
+        }
+
+        /* Eye icon for password toggle */
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #666;
+            font-size: 16px;
+            opacity: 0.8;
+            background: none;
+            border: none;
+            padding: 0;
+            z-index: 2;
+            display: flex; /* Ensure icon is always visible */
+            align-items: center;
+            justify-content: center;
+            width: 30px; /* Give it a fixed width */
+            height: 30px; /* Give it a fixed height */
+        }
+
+        /* Style for the eye icon itself */
+        .toggle-password i {
+            display: block; /* Ensure icon is always visible */
+            line-height: 1;
+        }
+
+        /* Hover effect for better UX */
+        .toggle-password:hover {
+            opacity: 1;
+        }
+
+        /* Remove the !important from icon colors */
+        .form-group i {
+            color: #666;
+        }
+
+        /* Focus states */
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #ddd;
+        }
+
+        /* Select dropdown */
+        .form-group select {
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23666' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 35px;
+        }
+
+        .email-group {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .verify-btn {
+            position: absolute;
+            right: 10px;
+            padding: 8px 15px;
+            background-color: #fc8019;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+
+        .verify-btn:hover {
+            background-color: #e67215;
+        }
+
+        .verify-btn.verified {
+            background-color: #28a745;
+            cursor: default;
+        }
+
+        .otp-container {
+            margin-top: 15px;
+        }
+
+        .otp-inputs {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        .otp-input {
+            width: 45px;
+            height: 45px;
+            text-align: center;
+            font-size: 18px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            background: white;
+        }
+
+        .otp-input:focus {
+            border-color: #fc8019;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(252, 128, 25, 0.1);
+        }
+
+        .verify-otp-btn {
+            width: 100%;
+            padding: 10px;
+            background-color: #fc8019;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+
+        .verify-otp-btn:hover {
+            background-color: #e67215;
+        }
+
+        .terms-checkbox {
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .terms-checkbox label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .terms-checkbox input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
+        .terms-checkbox a {
+            color: #fc8019;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .terms-checkbox a:hover {
+            text-decoration: underline;
+        }
+
+        /* Add these styles to match your existing design */
+        .form-group select {
+            width: 100%;
+            padding: 12px 35px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 15px;
+            background-color: white;
+            color: #333;
+            appearance: none; /* Remove default arrow */
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1em;
+        }
+
+        .form-group select:focus {
+            outline: none;
+            border-color: #fc8019;
+        }
+
+        .form-group select option {
+            padding: 10px;
+        }
+
+        /* Style for the icons */
+        .form-group .fas.fa-clock,
+        .form-group .fas.fa-map-marker-alt {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+            font-size: 14px;
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body class="partner-page">
+    <a href="{% url 'joo:partner' %}" class="corner-back-btn" style="background-color: white; color: #fc8019;">
+        <i class="fas fa-arrow-left"></i> Back to Categories
+    </a>
+
+    <div class="login-container">
+        <div class="logo">
+            <img src="{% static 'img/logocopy.png' %}" alt="Mr.Foody & Ms.Foody Logo">
+        </div>
+        <div class="partner-form delivery-form">
+            <h2>Delivery Partner Registration</h2>
+            <p class="subtitle">Join our delivery network</p>
+
+            <form method="POST" id="deliveryForm">
+                {% csrf_token %}
+                <!-- Personal Information -->
+                <div class="form-section">
+                    <h3>Personal Information</h3>
+                    <div class="form-group">
+                        <i class="far fa-user"></i>
+                        <input type="text" id="full-name" placeholder="Full Name" required>
+                    </div>
+                    <div class="form-group email-group">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="business-email" placeholder="Email Address" required>
+                        <button type="button" id="verify-email-btn" class="verify-btn" onclick="sendOTP()">
+                            Verify
+                        </button>
+                    </div>
+                    <!-- OTP Container -->
+                    <div id="otp-container" class="otp-container" style="display: none;">
+                        <div class="otp-inputs">
+                            <input type="text" class="otp-input" maxlength="1" data-index="1">
+                            <input type="text" class="otp-input" maxlength="1" data-index="2">
+                            <input type="text" class="otp-input" maxlength="1" data-index="3">
+                            <input type="text" class="otp-input" maxlength="1" data-index="4">
+                        </div>
+                        <button type="button" class="verify-otp-btn" onclick="verifyOTP()">Verify OTP</button>
+                    </div>
+                    <div class="form-group">
+                        <i class="fas fa-phone"></i>
+                        <input type="tel" id="phone" placeholder="Phone Number" required>
+                    </div>
+                    <div class="form-group">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <input type="text" id="address" placeholder="Current Address" required>
+                    </div>
+                </div>
+
+                <!-- Vehicle Information -->
+                <div class="form-section">
+                    <h3>Vehicle Information</h3>
+                    <div class="form-group">
+                        <i class="fas fa-motorcycle"></i>
+                        <select id="vehicle-type" required>
+                            <option value="">Select Vehicle Type</option>
+                            <option value="bike">Bike</option>
+                            <option value="scooter">Scooter</option>
+                            <option value="cycle">Cycle</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <i class="fas fa-car"></i>
+                        <input type="text" id="vehicle-number" placeholder="Vehicle Number" required>
+                    </div>
+                    <div class="form-group">
+                        <i class="fas fa-id-card"></i>
+                        <input type="text" id="license-number" placeholder="License Number" required>
+                    </div>
+                </div>
+
+                <!-- Delivery Preferences -->
+                <div class="form-section">
+                    <h3>Delivery Preferences</h3>
+                    <div class="form-group">
+                        <i class="fas fa-clock"></i>
+                        <select id="preferred-hours" required>
+                            <option value="">Select Preferred Hours</option>
+                            <option value="morning">Morning (6 AM - 12 PM)</option>
+                            <option value="afternoon">Afternoon (12 PM - 6 PM)</option>
+                            <option value="evening">Evening (6 PM - 12 AM)</option>
+                            <option value="night">Night (12 AM - 6 AM)</option>
+                            <option value="flexible">Flexible</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <select id="preferred-area" required>
+                            <option value="">Select Preferred Area</option>
+                            <option value="north">North</option>
+                            <option value="south">South</option>
+                            <option value="east">East</option>
+                            <option value="west">West</option>
+                            <option value="central">Central</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Account Security -->
+                <div class="form-section">
+                    <h3>Account Security</h3>
+                    <div class="form-group">
+                        <i class="fas fa-key"></i>
+                        <input type="password" id="password" placeholder="Create Password" required>
+                        <span class="toggle-password" onclick="togglePassword('password', this)" tabindex="0">
+                            <i class="far fa-eye-slash"></i>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="terms-checkbox">
+                    <label>
+                        <input type="checkbox" id="termsCheckbox" required>
+                        <span>I agree to the <a href="{% url 'joo:terms_conditions' %}" target="_blank">Terms & Conditions</a></span>
+                    </label>
+                </div>
+                <button type="submit" class="login-btn" disabled>Register as Delivery Partner</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function togglePassword(inputId, element) {
+            const passwordInput = document.getElementById(inputId);
+            const icon = element.querySelector('i');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            }
+        }
+
+        function sendOTP() {
+            const email = document.getElementById('business-email').value;
+            if (!email) {
+                alert('Please enter email');
+                return;
+            }
+
+            const verifyBtn = document.getElementById('verify-email-btn');
+            verifyBtn.disabled = true;
+            verifyBtn.textContent = 'Sending...';
+
+            fetch('{% url "joo:send_otp" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ 
+                    email: email
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                verifyBtn.disabled = false;
+                verifyBtn.textContent = 'Verify';
+                
+                if (data.status === 'success') {
+                    document.getElementById('otp-container').style.display = 'block';
+                    alert('OTP sent successfully! Please check your email.');
+                } else {
+                    throw new Error(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                verifyBtn.disabled = false;
+                verifyBtn.textContent = 'Verify';
+                alert('Error sending OTP: ' + error.message);
+            });
+        }
+
+        function verifyOTP() {
+            const email = document.getElementById('business-email').value;
+            const otpInputs = document.querySelectorAll('.otp-input');
+            const otp = Array.from(otpInputs).map(input => input.value).join('');
+
+            if (!email || !otp) {
+                alert('Please enter both email and OTP');
+                return;
+            }
+
+            const verifyOTPBtn = document.querySelector('.verify-otp-btn');
+            verifyOTPBtn.disabled = true;
+            verifyOTPBtn.textContent = 'Verifying...';
+
+            fetch('{% url "joo:verify_otp" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
+                    email: email,
+                    otp: otp
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                verifyOTPBtn.disabled = false;
+                verifyOTPBtn.textContent = 'Verify OTP';
+                
+                if (data.status === 'success') {
+                    // Hide OTP container
+                    document.getElementById('otp-container').style.display = 'none';
+                    
+                    // Update verify button
+                    const verifyBtn = document.getElementById('verify-email-btn');
+                    verifyBtn.textContent = 'Verified';
+                    verifyBtn.classList.add('verified');
+                    verifyBtn.disabled = true;
+                    
+                    // Make email field readonly
+                    document.getElementById('business-email').readOnly = true;
+                    
+                    // Update register button state
+                    updateRegisterButton();
+                    
+                    alert('Email verified successfully!');
+                } else {
+                    throw new Error(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                verifyOTPBtn.disabled = false;
+                verifyOTPBtn.textContent = 'Verify OTP';
+                alert('Error verifying OTP: ' + error.message);
+            });
+        }
+
+        // Auto-focus next OTP input
+        document.querySelectorAll('.otp-input').forEach(input => {
+            input.addEventListener('input', function() {
+                this.value = this.value.replace(/[^0-9]/g, ''); // Only allow numbers
+                if (this.value.length === 1) {
+                    const nextInput = document.querySelector(`.otp-input[data-index="${parseInt(this.dataset.index) + 1}"]`);
+                    if (nextInput) nextInput.focus();
+                }
+            });
+
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Backspace' && !this.value) {
+                    const prevInput = document.querySelector(`.otp-input[data-index="${parseInt(this.dataset.index) - 1}"]`);
+                    if (prevInput) prevInput.focus();
+                }
+            });
+        });
+
+        document.getElementById('deliveryForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Check if email is verified and terms accepted
+            const emailVerified = document.getElementById('verify-email-btn').classList.contains('verified');
+            const termsAccepted = document.getElementById('termsCheckbox').checked;
+            
+            if (!emailVerified) {
+                alert('Please verify your email first');
+                return;
+            }
+            
+            if (!termsAccepted) {
+                alert('Please accept the terms and conditions');
+                return;
+            }
+
+            try {
+                const formData = {
+                    full_name: document.getElementById('full-name').value,
+                    email: document.getElementById('business-email').value,
+                    phone: document.getElementById('phone').value,
+                    address: document.getElementById('address').value,
+                    vehicle_type: document.getElementById('vehicle-type').value,
+                    vehicle_number: document.getElementById('vehicle-number').value,
+                    license_number: document.getElementById('license-number').value,
+                    preferred_hours: document.getElementById('preferred-hours').value,
+                    preferred_area: document.getElementById('preferred-area').value,
+                    password: document.getElementById('password').value
+                };
+
+                // Validate required fields
+                for (const [key, value] of Object.entries(formData)) {
+                    if (!value) {
+                        alert(`Please fill in ${key.replace(/_/g, ' ')}`);
+                        return;
+                    }
+                }
+
+                const response = await fetch('{% url "joo:register_delivery_partner" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    alert('Registration successful! You can now login.');
+                    window.location.href = data.redirect_url;
+                } else {
+                    throw new Error(data.message || 'Registration failed');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert(error.message || 'Error during registration. Please try again.');
+            }
+        });
+
+        // Add this function to handle the register button state
+        function updateRegisterButton() {
+            const emailVerified = document.getElementById('verify-email-btn').classList.contains('verified');
+            const termsAccepted = document.getElementById('termsCheckbox').checked;
+            const registerButton = document.querySelector('.login-btn');
+            
+            registerButton.disabled = !(emailVerified && termsAccepted);
+        }
+
+        // Add event listener for terms checkbox
+        document.getElementById('termsCheckbox').addEventListener('change', updateRegisterButton);
+    </script>
+</body>
+</html> 

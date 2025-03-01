@@ -1,0 +1,246 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terms & Conditions - Mr.Foody & Ms.Foody</title>
+    <link rel="stylesheet" href="{% static 'css/common.css' %}">
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="logo">
+            <img src="{% static 'images/logocopy.png' %}" alt="Mr.Foody & Ms.Foody Logo">
+        </div>
+        
+        <div class="terms-content">
+            <h1>Terms and Conditions</h1>
+            <p class="last-updated">Last Updated: {% now "F d, Y" %}</p>
+
+            <section>
+                <h2>1. Introduction</h2>
+                <p>Welcome to Mr.Foody & Ms.Foody. By using our platform, you agree to these terms and conditions. Our platform provides food delivery services, restaurant partnerships, and venue booking facilities.</p>
+            </section>
+
+            <section>
+                <h2>2. Definitions</h2>
+                <ul>
+                    <li>"Platform" refers to Mr.Foody & Ms.Foody website and services</li>
+                    <li>"User" refers to customers using our platform</li>
+                    <li>"Partner" refers to restaurants, venues, and delivery partners</li>
+                    <li>"Services" refers to food delivery and venue booking services</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>3. Platform Usage</h2>
+                <p>Users must be at least 18 years old to use our services. All information provided must be accurate and current. We reserve the right to suspend accounts that violate our terms.</p>
+            </section>
+
+            <section>
+                <h2>4. Partner Responsibilities</h2>
+                <h3>4.1 Restaurants</h3>
+                <ul>
+                    <li>Maintain food quality and safety standards</li>
+                    <li>Provide accurate menu information</li>
+                    <li>Process orders in a timely manner</li>
+                    <li>Comply with local health regulations</li>
+                </ul>
+
+                <h3>4.2 Delivery Partners</h3>
+                <ul>
+                    <li>Maintain vehicle safety and cleanliness</li>
+                    <li>Ensure timely delivery</li>
+                    <li>Handle food items with care</li>
+                    <li>Follow traffic rules and regulations</li>
+                </ul>
+
+                <h3>4.3 Venue Partners</h3>
+                <ul>
+                    <li>Maintain venue cleanliness and safety</li>
+                    <li>Honor bookings and reservations</li>
+                    <li>Provide accurate venue information</li>
+                    <li>Ensure proper facilities as advertised</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>5. Payment Terms</h2>
+                <p>All payments are processed securely. Partners will receive payments as per the agreed commission structure. Refunds will be processed according to our refund policy.</p>
+            </section>
+
+            <section>
+                <h2>6. Cancellation Policy</h2>
+                <ul>
+                    <li>Food orders can be cancelled before the restaurant starts preparing</li>
+                    <li>Venue bookings cancellation terms vary by venue</li>
+                    <li>Delivery partners must provide notice for availability changes</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>7. Privacy & Data</h2>
+                <p>We protect your personal information according to our privacy policy. Partners must maintain confidentiality of user data.</p>
+            </section>
+
+            <section>
+                <h2>8. Contact Us</h2>
+                <p>For any queries regarding these terms, please contact us at:</p>
+                <ul class="contact-info">
+                    <li>Email: support@mrfoody-msfoody.com</li>
+                    <li>Phone: +91 XXX XXX XXXX</li>
+                    <li>Address: [Your Business Address]</li>
+                </ul>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const backButton = document.querySelector('.corner-back-btn');
+            backButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                // Close current tab/window
+                window.close();
+                // If window.close() doesn't work (some browsers block it), redirect to partner page
+                window.location.href = "{% url 'joo:partner' %}";
+            });
+        });
+    </script>
+
+    <a href="#" class="corner-back-btn">
+        <i class="fas fa-arrow-left"></i> Close
+    </a>
+
+    <style>
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo img {
+            max-width: 200px;
+        }
+
+        .terms-content {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #fc8019;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .last-updated {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        section {
+            margin-bottom: 30px;
+        }
+
+        h2 {
+            color: #fc8019;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        h3 {
+            color: #444;
+            margin: 20px 0 10px;
+            font-size: 1.2em;
+        }
+
+        p {
+            line-height: 1.6;
+            color: #444;
+            margin-bottom: 15px;
+        }
+
+        ul {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+
+        li {
+            margin-bottom: 8px;
+            line-height: 1.6;
+            color: #444;
+        }
+
+        .contact-info {
+            list-style: none;
+            margin-left: 0;
+        }
+
+        .contact-info li {
+            margin-bottom: 10px;
+            color: #666;
+        }
+
+        .corner-back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 15px;
+            background-color: white;
+            color: #fc8019;
+            text-decoration: none;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .corner-back-btn i {
+            font-size: 16px;
+        }
+
+        .corner-back-btn:hover {
+            background-color: #fff3ec;
+            color: #e67215;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 20px auto;
+                padding: 15px;
+            }
+
+            .terms-content {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            h2 {
+                font-size: 1.3em;
+            }
+        }
+    </style>
+</body>
+
+</html> 
