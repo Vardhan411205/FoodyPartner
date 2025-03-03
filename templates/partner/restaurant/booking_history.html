@@ -4,14 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Booking History - {{ request.session.restaurant_name }}</title>
-    <link rel="stylesheet" href="{% static 'css/common.css' %}">
+    <title>Orders & Bookings History - {{ request.session.restaurant_name }}</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* Copy all the common styles from dining_tables.html */
         * {
             box-sizing: border-box;
-            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
             margin: 0;
             padding: 0;
         }
@@ -39,12 +37,6 @@
             align-items: center;
             padding: 0 20px;
             width: 100%;
-            position: relative;
-        }
-
-        .nav-left {
-            display: flex;
-            align-items: center;
         }
 
         .brand {
@@ -52,15 +44,9 @@
             font-size: 1.8rem;
             font-weight: bold;
             text-decoration: none;
-            position: relative;
-            transition: transform 0.3s ease;
             display: flex;
             align-items: center;
             gap: 15px;
-        }
-
-        .brand:hover {
-            opacity: 0.9;
         }
 
         .profile-pic-placeholder {
@@ -93,7 +79,6 @@
             color: white;
         }
 
-        /* Desktop Menu */
         .desktop-menu {
             display: flex;
             gap: 25px;
@@ -108,41 +93,182 @@
             margin: 0 5px;
         }
 
-        .desktop-menu a::after {
-            content: '';
-            position: absolute;
+        /* Main Content Styles */
+        .container {
+            max-width: 1200px;
+            margin: 100px auto 20px;
+            padding: 0 20px;
+        }
+
+        .table {
             width: 100%;
-            height: 2px;
-            bottom: -2px;
-            left: 0;
-            background-color: white;
-            transform: scaleX(0);
-            transform-origin: bottom right;
-            transition: transform 0.3s ease-out;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-top: 20px;
         }
 
-        .desktop-menu a:hover::after {
-            transform: scaleX(1);
-            transform-origin: bottom left;
+        .table th, .table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
         }
 
-        /* Mobile Menu */
-        .mobile-menu {
-            display: none;
+        .table th {
+            background: #f8f9fa;
+            font-weight: 600;
         }
 
-        /* Mobile Styles */
+        .badge {
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+
+        .badge-pending {
+            background-color: #ffc107;
+            color: #000;
+        }
+
+        .badge-completed {
+            background-color: #28a745;
+            color: #fff;
+        }
+
+        .badge-cancelled {
+            background-color: #dc3545;
+            color: #fff;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background-color: #fc8019;
+            color: white;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .btn-success {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        /* Enhanced Button Group Styles */
+        .btn-group {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        /* Enhanced Button Styles */
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.875rem;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: 500;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .btn-success {
+            background-color: #28a745;
+            color: white;
+            border: 1px solid #218838;
+        }
+
+        .btn-success:hover {
+            background-color: #218838;
+            box-shadow: 0 4px 8px rgba(40, 167, 69, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+            border: 1px solid #c82333;
+        }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+            box-shadow: 0 4px 8px rgba(220, 53, 69, 0.2);
+            transform: translateY(-1px);
+        }
+
+        /* Icon styles */
+        .btn-sm i {
+            font-size: 0.875rem;
+        }
+
+        /* Disable hover effects when button is disabled */
+        .btn-sm:disabled {
+            opacity: 0.65;
+            pointer-events: none;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Add animation for status change */
+        .btn-sm:active {
+            transform: translateY(1px);
+            box-shadow: none;
+        }
+
+        /* Mobile Navigation Styles */
         @media (max-width: 768px) {
-            .nav-right {
+            .nav-content {
                 position: relative;
             }
 
             .desktop-menu {
                 display: none;
+                position: absolute;
+                top: 100%;
+                right: 0;
+                background: white;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                padding: 10px 0;
+                min-width: 200px;
+                margin-top: 10px;
             }
 
-            .mobile-menu {
+            .desktop-menu.active {
                 display: block;
+            }
+
+            .desktop-menu a {
+                color: #333;
+                padding: 12px 20px;
+                display: block;
+                margin: 0;
+            }
+
+            .desktop-menu a:hover {
+                background: #f8f8f8;
+            }
+
+            .desktop-menu a.active {
+                color: #fc8019;
+                background: #fff3e6;
             }
 
             .menu-toggle {
@@ -151,388 +277,296 @@
                 border: none;
                 color: white;
                 font-size: 24px;
-                padding: 5px;
                 cursor: pointer;
+                padding: 5px;
             }
 
-            .dropdown-menu {
-                display: none;
-                position: fixed;
-                top: 70px;
-                left: 0;
-                right: 0;
-                background: white;
-                padding: 10px 0;
-                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            }
-
-            .mobile-menu.active .dropdown-menu {
-                display: block;
-            }
-
-            .dropdown-menu a {
-                display: block;
-                padding: 15px 20px;
-                color: #fc8019;
-                text-decoration: none;
-                border-bottom: 1px solid #eee;
-                font-size: 16px;
-            }
-        }
-
-        /* Additional styles for extra small devices */
-        @media (max-width: 480px) {
-            .page-title {
-                font-size: 20px;
-            }
-
-            .bookings-table th {
-                font-size: 13px;
-            }
-
-            .bookings-table td {
-                font-size: 12px;
-            }
-
-            .action-btn {
-                padding: 6px 12px;
-                font-size: 13px;
-            }
-        }
-
-        /* Booking History Content Styles */
-        .main-content {
-            margin-top: 80px;
-            padding: 30px;
-        }
-
-        .bookings-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 30px;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-
-        .page-header {
-            text-align: center;
-            margin-bottom: 30px;
-            color: #333;
-            font-size: 24px;
-            font-weight: 600;
-        }
-
-        .bookings-table {
-            width: 100%;
-            overflow-x: auto;
-            margin-top: 20px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th, td {
-            padding: 15px;
-            text-align: left;
-            border-bottom: 1px solid #eee;
-        }
-
-        th {
-            background: #f8f9fa;
-            font-weight: 600;
-            color: #333;
-        }
-
-        .status-badge {
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 500;
-        }
-
-        .status-badge.pending {
-            background: #fff3e0;
-            color: #ef6c00;
-        }
-
-        .status-badge.completed {
-            background: #e8f5e9;
-            color: #2e7d32;
-        }
-
-        .status-badge.cancelled {
-            background: #ffebee;
-            color: #c62828;
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 8px;
-        }
-
-        .action-btn {
-            padding: 8px 16px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            transition: all 0.3s;
-        }
-
-        .complete-btn {
-            background: #28a745;
-            color: white;
-        }
-
-        .cancel-btn {
-            background: #dc3545;
-            color: white;
-        }
-
-        .action-btn:hover {
-            opacity: 0.9;
-            transform: translateY(-1px);
-        }
-
-        .no-bookings {
-            text-align: center;
-            padding: 40px;
-            color: #666;
-            font-style: italic;
-        }
-
-        /* Update Navigation Styles */
-        .dropdown-menu {
-            display: none;
-            position: absolute;
-            top: 100%;
-            right: 20px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-            padding: 10px 0;
-            min-width: 200px;
-            z-index: 1001;
-            animation: slideIn 0.3s ease-out;
-            border: 1px solid rgba(252, 128, 25, 0.1);
-        }
-
-        .dropdown-menu a {
-            display: block;
-            padding: 10px 20px;
-            color: #fc8019;
-            text-decoration: none;
-            transition: all 0.2s ease-out;
-            position: relative;
-            padding-left: 30px;
-            font-family: 'Helvetica Neue', Arial, sans-serif;
-        }
-
-        .dropdown-menu a:hover {
-            background: #fff5ee;
-            color: #e67312;
-            transform: translateX(5px);
-        }
-
-        .dropdown-menu a.active {
-            font-weight: 600;
-            color: #fc8019;
-        }
-
-        .menu-toggle {
-            display: none;
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Initially hide mobile menu and toggle button */
-        .mobile-menu {
-            display: none;
-        }
-
-        /* Show mobile menu only on mobile devices */
-        @media (max-width: 768px) {
-            .secondary-nav {
-                padding: 15px 0;
-            }
-
+            /* Brand and Profile Section */
             .brand {
-                font-size: 1.6rem;
+                font-size: 1.4rem;
             }
 
             .profile-pic-placeholder {
-                width: 45px;
-                height: 45px;
-                font-size: 20px;
-            }
-
-            .partner-details {
-                gap: 4px;
-            }
-
-            .partner-label {
-                font-size: 12px;
-            }
-
-            .restaurant-name {
+                width: 35px;
+                height: 35px;
                 font-size: 16px;
             }
 
-            .nav-content {
-                padding: 0 20px;
+            .partner-label {
+                font-size: 11px;
             }
 
-            .menu-toggle {
+            .restaurant-name {
+                font-size: 14px;
+            }
+        }
+
+        /* Mobile Content Styles */
+        @media (max-width: 768px) {
+            .container {
+                margin: 80px auto 20px;
+                padding: 0 10px;
+            }
+
+            h1 {
+                font-size: 20px;
+                margin-bottom: 15px;
+            }
+
+            /* Filter Buttons */
+            .mb-4 {
                 display: flex;
-                align-items: center;
-                justify-content: center;
-                background: none;
-                border: none;
-                color: white;
-                font-size: 1.8rem;
-                cursor: pointer;
-                padding: 8px;
+                gap: 8px;
+                margin-bottom: 15px;
+                overflow-x: auto;
+                padding-bottom: 5px;
             }
 
-            .menu-toggle:hover {
-                background: rgba(255, 255, 255, 0.1);
-                border-radius: 50%;
+            .btn {
+                padding: 8px 12px;
+                font-size: 13px;
+                white-space: nowrap;
             }
 
-            .dropdown-menu {
+            /* Table Styles */
+            .table-responsive {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                margin: 0 -10px;
+                padding: 0 10px;
+            }
+
+            .table {
+                font-size: 13px;
+            }
+
+            .table th, 
+            .table td {
+                padding: 10px 8px;
+            }
+
+            /* Hide less important columns on mobile */
+            .table th:nth-child(3),
+            .table th:nth-child(4),
+            .table td:nth-child(3),
+            .table td:nth-child(4) {
                 display: none;
-                position: absolute;
-                top: 100%;
-                right: 15px;
-                background: white;
-                border-radius: 8px;
-                box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-                padding: 10px 0;
-                min-width: 200px;
-                z-index: 1001;
             }
 
-            .mobile-menu.active .dropdown-menu {
-                display: block;
-                animation: slideIn 0.3s ease-out;
+            /* Status Badge */
+            .badge {
+                padding: 6px 8px;
+                font-size: 0.75rem;
             }
+
+            /* Action Buttons */
+            .btn-group {
+                flex-direction: column;
+                gap: 5px;
+            }
+
+            .btn-sm {
+                padding: 5px 10px;
+                font-size: 0.75rem;
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* Add dropdown arrow to menu */
+        .desktop-menu::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            right: 15px;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-bottom: 8px solid white;
         }
     </style>
 </head>
 <body>
+    <!-- Navigation -->
     <nav class="secondary-nav">
         <div class="nav-content">
-            <div class="nav-left">
-                <a href="{% url 'joo:restaurant_dashboard' %}" class="brand">
-                    <div class="profile-pic-placeholder">
-                        <i class="fas fa-utensils"></i>
-                    </div>
-                    <div class="partner-details">
-                        <span class="partner-label">Restaurant Partner</span>
-                        <span class="restaurant-name">{{ request.session.restaurant_name }}</span>
-                    </div>
-                </a>
-            </div>
-            <div class="nav-right">
-                <div class="desktop-menu">
-                    <a href="{% url 'joo:update_restaurant_profile' %}">Edit Profile</a>
-                    <a href="{% url 'joo:restaurant_food_items' %}">Food Items</a>
-                    <a href="{% url 'joo:restaurant_dining_tables' %}">Dining Tables</a>
-                    <a href="{% url 'joo:restaurant_booking_history' %}" class="active">Bookings</a>
-                    <a href="{% url 'joo:restaurant_logout' %}">Logout</a>
+            <a href="{% url 'joo:restaurant_dashboard' %}" class="brand">
+                <div class="profile-pic-placeholder">
+                    <i class="fas fa-store"></i>
                 </div>
-                <div class="mobile-menu">
-                    <button class="menu-toggle">
-                        <i class="fas fa-bars"></i>
-                    </button>
-                    <div class="dropdown-menu">
-                        <a href="{% url 'joo:update_restaurant_profile' %}">Edit Profile</a>
-                        <a href="{% url 'joo:restaurant_food_items' %}">Food Items</a>
-                        <a href="{% url 'joo:restaurant_dining_tables' %}">Dining Tables</a>
-                        <a href="{% url 'joo:restaurant_booking_history' %}" class="active">Bookings</a>
-                        <a href="{% url 'joo:restaurant_logout' %}">Logout</a>
-                    </div>
+                <div class="partner-details">
+                    <span class="partner-label">Restaurant Partner</span>
+                    <span class="restaurant-name">{{ restaurant.restaurant_name }}</span>
                 </div>
+            </a>
+            <button class="menu-toggle" style="display: none;">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="desktop-menu">
+                <a href="{% url 'joo:update_restaurant_profile' %}">Edit Profile</a>
+                <a href="{% url 'joo:restaurant_food_items' %}">Food Items</a>
+                <a href="{% url 'joo:restaurant_dining_tables' %}">Dining Tables</a>
+                <a href="{% url 'joo:restaurant_booking_history' %}" class="active">Orders & Bookings</a>
+                <a href="{% url 'joo:restaurant_logout' %}">Logout</a>
             </div>
         </div>
     </nav>
 
-    <div class="main-content">
-        <div class="bookings-container">
-            <div class="page-header">
-                <h1>Booking History</h1>
-            </div>
+    <!-- Main Content -->
+    <div class="container">
+        <h1 class="text-center mb-4">Orders & Bookings History</h1>
+        
+        <!-- Debug information -->
+        {% if debug %}
+        <div class="debug-info" style="background: #f5f5f5; padding: 10px; margin-bottom: 20px;">
+            <p>Current Restaurant: {{ request.session.restaurant_name }}</p>
+            <p>Number of Orders: {{ joo_orders|length }}</p>
+            {% if joo_orders %}
+                <p>Order Types:</p>
+                <ul>
+                {% for order in joo_orders %}
+                    <li>{{ order.order_type }} - {{ order.restaurant_name }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+        {% endif %}
+        
+        <div class="mb-4">
+            <button class="btn btn-primary active" data-type="food">🍽️ Food Orders</button>
+            <button class="btn btn-secondary" data-type="dining">🪑 Table Bookings</button>
+        </div>
 
-            <div class="bookings-table">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Order ID</th>
-                            <th>Customer Email</th>
-                            <th>Restaurant Email</th>
-                            <th>Date</th>
-                            <th>Time</th>
-                            <th>Status</th>
-                            <th>Actions</th>
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Customer Email</th>
+                        <th>Restaurant ID</th>
+                        <th>Restaurant</th>
+                        <th>Type</th>
+                        <th>Date & Time</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if joo_orders %}
+                        {% for order in joo_orders %}
+                        <tr class="booking-row" data-type="{{ order.order_type }}">
+                            <td>{{ order.order_id }}</td>
+                            <td>{{ order.customer_email }}</td>
+                            <td>{{ order.restaurant_id }}</td>
+                            <td>{{ order.restaurant_name }}</td>
+                            <td>
+                                {% if order.order_type == 'food' %}
+                                    Food Order
+                                {% elif order.order_type == 'dining' %}
+                                    Table Booking
+                                {% endif %}
+                            </td>
+                            <td>{{ order.booking_date|date:"M d, Y H:i" }}</td>
+                            <td>
+                                <span class="badge badge-{{ order.status|lower }}">
+                                    {{ order.status|title }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if order.status == 'pending' and order.order_type == 'dining' %}
+                                <div class="btn-group">
+                                    <button class="btn btn-success btn-sm" 
+                                            onclick="updateStatus('{{ order.order_id }}', 'completed')"
+                                            title="Mark as Completed">
+                                        <i class="fas fa-check"></i> Complete
+                                    </button>
+                                    <button class="btn btn-danger btn-sm" 
+                                            onclick="updateStatus('{{ order.order_id }}', 'cancelled')"
+                                            title="Mark as Cancelled">
+                                        <i class="fas fa-times"></i> Cancel
+                                    </button>
+                                </div>
+                                {% elif order.order_type == 'food' %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        {% if bookings %}
-                            {% for booking in bookings %}
-                                <tr>
-                                    <td>#{{ booking.order_id }}</td>
-                                    <td>{{ booking.customer_email }}</td>
-                                    <td>{{ booking.restaurant_email }}</td>
-                                    <td>{{ booking.booking_date|date:"d M Y" }}</td>
-                                    <td>{{ booking.booking_date|time:"h:i A" }}</td>
-                                    <td>
-                                        <span class="status-badge {{ booking.status }}">
-                                            {{ booking.get_status_display }}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <div class="action-buttons">
-                                            {% if booking.status == 'pending' %}
-                                                <button class="action-btn complete-btn" onclick="updateStatus('{{ booking.id }}', 'completed')">
-                                                    <i class="fas fa-check"></i> Complete
-                                                </button>
-                                                <button class="action-btn cancel-btn" onclick="updateStatus('{{ booking.id }}', 'cancelled')">
-                                                    <i class="fas fa-times"></i> Cancel
-                                                </button>
-                                            {% endif %}
-                                        </div>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        {% else %}
-                            <tr>
-                                <td colspan="7" class="no-bookings">No bookings found</td>
-                            </tr>
-                        {% endif %}
-                    </tbody>
-                </table>
-            </div>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="8" class="text-center">No orders found</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
         </div>
     </div>
 
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Filter buttons
+            const buttons = document.querySelectorAll('[data-type]');
+            const rows = document.querySelectorAll('.booking-row');
+
+            buttons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // Update button styles
+                    buttons.forEach(b => {
+                        b.classList.remove('active');
+                        b.classList.remove('btn-primary');
+                        b.classList.add('btn-secondary');
+                    });
+                    button.classList.add('active');
+                    button.classList.add('btn-primary');
+                    button.classList.remove('btn-secondary');
+
+                    // Filter rows
+                    const type = button.dataset.type;
+                    rows.forEach(row => {
+                        if (type === row.dataset.type) {
+                            row.style.display = '';
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    });
+                });
+            });
+
+            // Trigger click on "Food Orders" button by default
+            document.querySelector('[data-type="food"]').click();
+
+            // Add mobile menu toggle functionality
+            const menuToggle = document.querySelector('.menu-toggle');
+            const desktopMenu = document.querySelector('.desktop-menu');
+
+            menuToggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                desktopMenu.classList.toggle('active');
+            });
+
+            // Close menu when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!desktopMenu.contains(e.target) && !menuToggle.contains(e.target)) {
+                    desktopMenu.classList.remove('active');
+                }
+            });
+
+            // Show/hide menu toggle based on screen size
+            function updateMenuToggle() {
+                if (window.innerWidth <= 768) {
+                    menuToggle.style.display = 'block';
+                } else {
+                    menuToggle.style.display = 'none';
+                    desktopMenu.classList.remove('active');
+                }
+            }
+
+            // Initial check and listen for window resize
+            updateMenuToggle();
+            window.addEventListener('resize', updateMenuToggle);
+        });
+
         function updateStatus(bookingId, status) {
-            if (confirm(`Are you sure you want to mark this booking as ${status}?`)) {
+            if (confirm(`Are you sure you want to mark this order as ${status}?`)) {
                 fetch('{% url "joo:update_booking_status" %}', {
                     method: 'POST',
                     headers: {
@@ -547,14 +581,14 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.status === 'success') {
-                        window.location.reload();
+                        location.reload();
                     } else {
-                        alert('Error updating status: ' + data.message);
+                        alert('Error: ' + data.message);
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('Error updating booking status');
+                    alert('Error updating status');
                 });
             }
         }

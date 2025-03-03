@@ -8,8 +8,12 @@
     <link rel="stylesheet" href="{% static 'css/partner.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
+        *{
+            box-sizing: border-box;
+        }
         body{
             background: #fc8019;
+            font-family: 'Arial', sans-serif;
         }
         .form-group {
             position: relative;
@@ -289,6 +293,148 @@
             .login-container {
                 margin: 10px;
                 padding: 15px;
+            }
+        }
+
+        /* Mobile-optimized container */
+        @media (max-width: 768px) {
+            .login-container {
+                width: 95%;
+                margin: 10px auto;
+                padding: 15px;
+            }
+
+            .form-section {
+                padding: 15px;
+                margin-bottom: 15px;
+            }
+
+            .form-section h3 {
+                font-size: 16px;
+                margin-bottom: 12px;
+            }
+
+            /* Reduce form group spacing */
+            .form-group {
+                margin-bottom: 15px;
+            }
+
+            .form-group input,
+            .form-group select {
+                padding: 10px 12px;
+                padding-left: 30px;
+                font-size: 14px;
+            }
+
+            /* Adjust icon sizes */
+            .form-group i:not(.toggle-password) {
+                font-size: 12px;
+                left: 10px;
+            }
+
+            /* Make logo smaller on mobile */
+            .logo img {
+                width: 80px;
+                height: 80px;
+            }
+
+            /* Adjust OTP inputs */
+            .otp-inputs {
+                gap: 8px;
+            }
+
+            .otp-input {
+                width: 35px;
+                height: 35px;
+                font-size: 16px;
+            }
+
+            /* Adjust buttons */
+            .verify-btn {
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+
+            .verify-otp-btn,
+            .login-btn {
+                padding: 12px;
+                font-size: 14px;
+            }
+
+            /* Adjust terms checkbox */
+            .terms-checkbox {
+                margin: 15px 0;
+            }
+
+            .terms-checkbox label {
+                font-size: 12px;
+            }
+
+            /* Two-column layout for form fields on mobile */
+            .form-row {
+                display: flex;
+                gap: 10px;
+                margin-bottom: 10px;
+            }
+
+            .form-row .form-group {
+                flex: 1;
+                margin-bottom: 0;
+            }
+
+            /* Adjust section margins */
+            .form-section + .form-section {
+                margin-top: 15px;
+            }
+
+            /* Make headings more compact */
+            h2 {
+                font-size: 18px;
+                margin-bottom: 15px;
+            }
+
+            /* Adjust alert messages */
+            .alert {
+                padding: 10px;
+                font-size: 13px;
+                margin-bottom: 15px;
+            }
+
+            /* Make dropdown menus more touch-friendly */
+            .form-group select {
+                height: 40px;
+            }
+        }
+
+        /* Add smooth transitions */
+        .form-group input,
+        .form-group select,
+        .verify-btn,
+        .verify-otp-btn,
+        .login-btn {
+            transition: all 0.3s ease;
+        }
+
+        /* Improve touch targets */
+        @media (max-width: 768px) {
+            .toggle-password {
+                width: 40px;
+                height: 40px;
+            }
+
+            .form-group input:focus,
+            .form-group select:focus {
+                transform: scale(1.01);
+            }
+
+            /* Add some spacing between sections */
+            .form-section {
+                border-bottom: 1px solid #eee;
+                padding-bottom: 20px;
+            }
+
+            .form-section:last-child {
+                border-bottom: none;
             }
         }
     </style>

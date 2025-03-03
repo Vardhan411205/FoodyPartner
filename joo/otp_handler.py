@@ -9,17 +9,20 @@ def generate_otp():
     """Generate a 4-digit OTP"""
     return str(random.randint(1000, 9999))
 
-def send_otp(email, purpose='signup'):
-    """Send OTP to email"""
+def send_otp(email, purpose):
     try:
-        # Generate OTP
+        # Generate 4-digit OTP
         otp = generate_otp()
         
-        # Save OTP to database
+        # Set expiry time (15 minutes from now)
+        expires_at = timezone.now() + timedelta(minutes=15)
+        
+        # Save OTP
         OTPVerification.objects.create(
             email=email,
             otp=otp,
-            purpose=purpose
+            purpose=purpose,
+            expires_at=expires_at
         )
         
         # Send email
@@ -41,22 +44,25 @@ def send_otp(email, purpose='signup'):
             'message': str(e)
         }
 
-def verify_otp(email, otp, purpose='signup'):
-    """Verify OTP"""
+def verify_otp(email, otp, purpose):
     try:
         verification = OTPVerification.objects.filter(
             email=email,
+            otp=otp,
             purpose=purpose,
-            is_verified=False
-        ).latest('created_at')
+            is_verified=False,
+            expires_at__gt=timezone.now()
+        ).first()
         
-        if verification.otp == otp:
+        if verification:
             verification.is_verified = True
             verification.save()
             return True
-    except OTPVerification.DoesNotExist:
+            
         return False
-    return False
+        
+    except Exception:
+        return False
 
 def is_email_verified(email, purpose='signup'):
     """Check if email is verified"""

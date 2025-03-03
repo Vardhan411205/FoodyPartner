@@ -66,4 +66,13 @@ urlpatterns = [
     path('partner/send-reset-otp/', views.send_reset_otp, name='send_reset_otp'),
     path('partner/verify-reset-otp/', views.verify_reset_otp, name='verify_reset_otp'),
     path('partner/update-password/', views.update_password, name='update_password'),
+
+    # Restaurant partner URLs - make sure these are in the correct order
+    path('restaurant/dashboard/', views.restaurant_dashboard, name='restaurant_dashboard'),
+    path('restaurant/booking-history/', views.restaurant_booking_history, name='restaurant_booking_history'),
+    path('restaurant/profile/edit/', views.update_restaurant_profile, name='update_restaurant_profile'),
+    path('restaurant/food-items/', views.restaurant_food_items, name='restaurant_food_items'),
+    path('restaurant/dining-tables/', views.restaurant_dining_tables, name='restaurant_dining_tables'),
+    path('restaurant/update-booking-status/', views.update_booking_status, name='update_booking_status'),
+    path('restaurant/logout/', views.restaurant_logout, name='restaurant_logout'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

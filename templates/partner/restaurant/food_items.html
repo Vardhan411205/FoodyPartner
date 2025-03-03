@@ -10,7 +10,7 @@
     <style>
         * {
             box-sizing: border-box;
-            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
             margin: 0;
             padding: 0;
         }
@@ -650,9 +650,12 @@
             <div class="nav-right">
                 <div class="desktop-menu">
                     <a href="{% url 'joo:update_restaurant_profile' %}">Edit Profile</a>
-                    <a href="{% url 'joo:restaurant_food_items' %}" class="active">Food Items</a>
+                    <a href="{% url 'joo:restaurant_food_items' %}">Food Items</a>
                     <a href="{% url 'joo:restaurant_dining_tables' %}">Dining Tables</a>
-                    <a href="{% url 'joo:restaurant_booking_history' %}">Bookings</a>
+                    <a href="{% url 'joo:restaurant_booking_history' %}" class="nav-link">
+                        <i class="fas fa-history"></i>
+                        <span>Orders & Bookings History</span>
+                    </a>
                     <a href="{% url 'joo:restaurant_logout' %}">Logout</a>
                 </div>
                 <div class="mobile-menu">
@@ -661,9 +664,12 @@
                     </button>
                     <div class="dropdown-menu">
                         <a href="{% url 'joo:update_restaurant_profile' %}">Edit Profile</a>
-                        <a href="{% url 'joo:restaurant_food_items' %}" class="active">Food Items</a>
+                        <a href="{% url 'joo:restaurant_food_items' %}">Food Items</a>
                         <a href="{% url 'joo:restaurant_dining_tables' %}">Dining Tables</a>
-                        <a href="{% url 'joo:restaurant_booking_history' %}">Bookings</a>
+                        <a href="{% url 'joo:restaurant_booking_history' %}" class="nav-link">
+                            <i class="fas fa-history"></i>
+                            <span>Orders & Bookings History</span>
+                        </a>
                         <a href="{% url 'joo:restaurant_logout' %}">Logout</a>
                     </div>
                 </div>
@@ -768,6 +774,7 @@
                         <tr>
                             <th>Image</th>
                             <th>Name</th>
+                            <th>Restaurant</th>
                             <th>Category</th>
                             <th>Price</th>
                             <th>Rating</th>
@@ -781,6 +788,7 @@
                                 <img src="{{ item.image_url }}" alt="{{ item.name }}" class="food-item-image">
                             </td>
                             <td>{{ item.name }}</td>
+                            <td>{{ item.restaurant_name }}</td>
                             <td>{{ item.get_category_display }}</td>
                             <td class="price">₹{{ item.price }}</td>
                             <td>

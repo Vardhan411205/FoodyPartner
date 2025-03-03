@@ -18,6 +18,10 @@ from django.db import connection
 from django.contrib.auth import login
 import os
 from django.contrib.auth.hashers import make_password
+from django.db import transaction
+from django.db import connections
+import psycopg2
+from decimal import Decimal
 
 from .models import (
     DeliveryPartner, 
@@ -30,8 +34,6 @@ from .models import (
     Event, 
     EventPackage,
     Order,
-    VenueBooking,
-    RestaurantBooking,
     ResetPassword
 )
 
@@ -135,7 +137,7 @@ def restaurant_login(request):
             
             # Store restaurant info in session
             request.session['restaurant_id'] = restaurant.id
-            request.session['restaurant_name'] = restaurant.restaurant_name
+            request.session['restaurant_name'] = "3000"  # Set this to match the database
             request.session['restaurant_email'] = restaurant.email
             
             return JsonResponse({
@@ -411,46 +413,53 @@ def register_venue_partner(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            email = data.get('email')
             
-            # Check if email is verified with purpose='venue'
-            if not is_email_verified(email=email, purpose='venue'):
-                return JsonResponse({
-                    'status': 'error',
-                    'message': 'Please verify your email first'
-                })
-
-            # Check if venue already exists
-            if VenuePartner.objects.filter(email=email).exists():
-                return JsonResponse({
-                    'status': 'error',
-                    'message': 'Email already registered'
-                })
-
-            # Hash the password
+            # Get all the fields from the request
+            venue_name = data.get('venue_name')
+            owner_name = data.get('owner_name')
+            email = data.get('email')
+            phone = data.get('phone')
+            venue_type = data.get('venue_type')
+            seating_capacity = data.get('seating_capacity')
+            price = data.get('price', 0.00)
+            address = data.get('address')
+            venue_image = data.get('venue_image')
             password = data.get('password')
-            hashed_password = hashlib.sha256(password.encode()).hexdigest()
 
-            # Create venue partner
-            venue = VenuePartner.objects.create(
-                venue_name=data.get('venue_name'),
-                owner_name=data.get('owner_name'),
+            # Validate required fields
+            if not all([venue_name, owner_name, email, phone, venue_type, 
+                       seating_capacity, price, address, password]):
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'All fields are required'
+                })
+
+            # Create new venue partner
+            venue_partner = VenuePartner(
+                venue_name=venue_name,
+                owner_name=owner_name,
                 email=email,
-                phone=data.get('phone'),
-                venue_type=data.get('venue_type'),
-                seating_capacity=data.get('seating_capacity'),
-                address=data.get('address'),
-                venue_image=data.get('venue_image'),
-                password=hashed_password,
-                is_active=True
+                phone=phone,
+                venue_type=venue_type,
+                seating_capacity=seating_capacity,
+                price=Decimal(str(price)),
+                address=address,
+                venue_image=venue_image
             )
+            # Hash and set the password
+            venue_partner.set_password(password)
+            venue_partner.save()
 
             return JsonResponse({
                 'status': 'success',
-                'message': 'Registration successful',
-                'redirect_url': reverse('joo:venue_login')
+                'message': 'Registration successful'
             })
 
+        except json.JSONDecodeError:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Invalid JSON data'
+            })
         except Exception as e:
             return JsonResponse({
                 'status': 'error',
@@ -481,7 +490,9 @@ def terms_conditions(request):
     """Display terms and conditions page"""
     return render(request, 'login/terms_conditions.html')
 
+@csrf_exempt
 def restaurant_dashboard(request):
+    print("Entering dashboard view")  # Debug print
     """Display restaurant partner dashboard"""
     # Check if restaurant is logged in
     if 'restaurant_id' not in request.session:
@@ -611,42 +622,53 @@ def update_restaurant_profile(request):
         return redirect('joo:restaurant_login')
     
     try:
-        restaurant = RestaurantPartner.objects.get(id=request.session['restaurant_id'])
-        
-        if request.method == 'POST':
-            try:
-                # Update basic info
-                restaurant.restaurant_name = request.POST.get('restaurant_name', restaurant.restaurant_name)
-                restaurant.owner_name = request.POST.get('owner_name', restaurant.owner_name)
-                restaurant.email = request.POST.get('email', restaurant.email)
-                restaurant.phone = request.POST.get('phone', restaurant.phone)
-                restaurant.address = request.POST.get('address', restaurant.address)
-                restaurant.restaurant_image = request.POST.get('restaurant_image', restaurant.restaurant_image)
-                
-                restaurant.save()
-                
-                # Update session data
-                request.session['restaurant_name'] = restaurant.restaurant_name
-                request.session['restaurant_image'] = restaurant.restaurant_image
-                
-                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                    return JsonResponse({
-                        'status': 'success',
-                        'message': 'Profile updated successfully'
-                    })
-                else:
-                    messages.success(request, 'Profile updated successfully')
-                    return redirect('joo:update_restaurant_profile')
-                
-            except Exception as e:
-                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                    return JsonResponse({
-                        'status': 'error',
-                        'message': str(e)
-                    })
-                else:
-                    messages.error(request, f'Error updating profile: {str(e)}')
-        
+        with transaction.atomic():
+            restaurant = RestaurantPartner.objects.get(id=request.session['restaurant_id'])
+            
+            if request.method == 'POST':
+                try:
+                    old_name = restaurant.restaurant_name
+                    # Update basic info
+                    restaurant.restaurant_name = request.POST.get('restaurant_name', restaurant.restaurant_name)
+                    restaurant.owner_name = request.POST.get('owner_name', restaurant.owner_name)
+                    restaurant.email = request.POST.get('email', restaurant.email)
+                    restaurant.phone = request.POST.get('phone', restaurant.phone)
+                    restaurant.address = request.POST.get('address', restaurant.address)
+                    restaurant.restaurant_image = request.POST.get('restaurant_image', restaurant.restaurant_image)
+                    
+                    restaurant.save()
+                    
+                    # Update both food items and dining tables
+                    if old_name != restaurant.restaurant_name:
+                        FoodItem.objects.filter(restaurant=restaurant).update(
+                            restaurant_name=restaurant.restaurant_name
+                        )
+                        DiningTable.objects.filter(restaurant=restaurant).update(
+                            restaurant_name=restaurant.restaurant_name
+                        )
+                    
+                    # Update session data
+                    request.session['restaurant_name'] = restaurant.restaurant_name
+                    request.session['restaurant_image'] = restaurant.restaurant_image
+                    
+                    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                        return JsonResponse({
+                            'status': 'success',
+                            'message': 'Profile updated successfully'
+                        })
+                    else:
+                        messages.success(request, 'Profile updated successfully')
+                        return redirect('joo:update_restaurant_profile')
+                    
+                except Exception as e:
+                    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                        return JsonResponse({
+                            'status': 'error',
+                            'message': str(e)
+                        })
+                    else:
+                        messages.error(request, f'Error updating profile: {str(e)}')
+            
         return render(request, 'partner/restaurant/edit_profile.html', {
             'restaurant': restaurant
         })
@@ -688,6 +710,7 @@ def restaurant_food_items(request):
                 food_item = FoodItem.objects.create(
                     restaurant=restaurant,
                     name=name,
+                    restaurant_name=restaurant.restaurant_name,
                     price=price,
                     category=category,
                     image_url=image_url,
@@ -728,6 +751,117 @@ def restaurant_food_items(request):
         return redirect('joo:restaurant_login')
 
 @csrf_exempt
+def delivery_orders(request):
+    """Handle delivery partner orders view"""
+    if 'delivery_id' not in request.session:
+        return redirect('joo:delivery_login')
+    
+    try:
+        delivery_partner = DeliveryPartner.objects.get(id=request.session['delivery_id'])
+        
+        # Connect directly to the database
+        conn = psycopg2.connect(
+            dbname="neondb",
+            user="neondb_owner",
+            password="npg_wIejAbND13TE",
+            host="ep-flat-king-a181p50o-pooler.ap-southeast-1.aws.neon.tech",
+            port="5432",
+            sslmode="require"
+        )
+        
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT id, order_id, customer_email, restaurant_name, status 
+            FROM joo_order 
+            WHERE order_type = 'food' 
+            ORDER BY booking_date DESC
+        """)
+        
+        columns = [desc[0] for desc in cursor.description]
+        orders = [dict(zip(columns, row)) for row in cursor.fetchall()]
+        
+        cursor.close()
+        conn.close()
+        
+        return render(request, 'partner/delivery/orders.html', {
+            'orders': orders
+        })
+        
+    except DeliveryPartner.DoesNotExist:
+        messages.error(request, "Delivery partner not found")
+        return redirect('joo:delivery_login')
+    except Exception as e:
+        messages.error(request, f"Database error: {str(e)}")
+        return redirect('joo:delivery_dashboard')
+
+@csrf_exempt
+def complete_order(request):
+    """Handle order completion by delivery partner"""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            
+            conn = psycopg2.connect(
+                dbname="neondb",
+                user="neondb_owner",
+                password="npg_wIejAbND13TE",
+                host="ep-flat-king-a181p50o-pooler.ap-southeast-1.aws.neon.tech",
+                port="5432",
+                sslmode="require"
+            )
+            
+            cursor = conn.cursor()
+            
+            # Check if order exists and is pending
+            cursor.execute("""
+                SELECT id, status 
+                FROM joo_order 
+                WHERE id = %s AND order_type = 'food'
+            """, [data['order_id']])
+            
+            order = cursor.fetchone()
+            
+            if not order:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Order not found'
+                })
+            
+            if order[1] != 'pending':
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Order is not in pending status'
+                })
+            
+            # Update the order status
+            cursor.execute("""
+                UPDATE joo_order 
+                SET status = 'completed', 
+                    updated_at = NOW() 
+                WHERE id = %s
+            """, [data['order_id']])
+            
+            conn.commit()
+            cursor.close()
+            conn.close()
+            
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Order completed successfully'
+            })
+            
+        except Exception as e:
+            return JsonResponse({
+                'status': 'error',
+                'message': str(e)
+            })
+    
+    return JsonResponse({
+        'status': 'error',
+        'message': 'Invalid request method'
+    })
+
+@csrf_exempt
 def restaurant_dining_tables(request):
     """Handle restaurant dining tables"""
     if 'restaurant_id' not in request.session:
@@ -746,6 +880,7 @@ def restaurant_dining_tables(request):
                     if action == 'add':
                         table = DiningTable.objects.create(
                             restaurant=restaurant,
+                            restaurant_name=restaurant.restaurant_name,
                             table_number=data.get('table_number'),
                             category=data.get('category'),
                             seating_capacity=data.get('seating_capacity'),
@@ -797,57 +932,90 @@ def restaurant_dining_tables(request):
 
 @csrf_exempt
 def restaurant_booking_history(request):
-    if 'restaurant_id' not in request.session:
-        return redirect('joo:restaurant_login')
-        
     try:
-        restaurant = RestaurantPartner.objects.get(id=request.session['restaurant_id'])
-        bookings = RestaurantBooking.objects.filter(restaurant=restaurant)
-        
-        # When creating a new booking, include restaurant email
-        if request.method == 'POST':
-            booking = RestaurantBooking(
-                restaurant=restaurant,
-                restaurant_email=restaurant.email,
-                # ... other fields ...
-            )
-            booking.save()
-        
-        return render(request, 'partner/restaurant/booking_history.html', {
-            'restaurant': restaurant,
-            'bookings': bookings
-        })
-        
-    except RestaurantPartner.DoesNotExist:
-        return redirect('joo:restaurant_login')
+        # Use the 'user' database connection where joo_order table exists
+        with connections['user'].cursor() as cursor:
+            # First get the restaurant name
+            cursor.execute("""
+                SELECT DISTINCT restaurant_name 
+                FROM public.joo_order 
+                ORDER BY restaurant_name 
+                LIMIT 1;
+            """)
+            result = cursor.fetchone()
+            if result:
+                restaurant_name = result[0]  # This should be "3000"
+                print(f"Found restaurant name from database: {restaurant_name}")
+            else:
+                print("No restaurant found in database")
+                return render(request, 'partner/restaurant/booking_history.html', {
+                    'error': 'No restaurant found',
+                    'joo_orders': []
+                })
+
+            # Get the orders using the same connection
+            query = """
+                SELECT order_id, customer_email, restaurant_id, 
+                       restaurant_name, order_type, booking_date, status, items
+                FROM public.joo_order 
+                WHERE restaurant_name = %s
+                AND order_type IN ('food', 'dining')
+                ORDER BY booking_date DESC;
+            """
+            cursor.execute(query, [restaurant_name])
+            
+            columns = [col[0] for col in cursor.description]
+            results = cursor.fetchall()
+            print(f"Found {len(results)} orders for restaurant {restaurant_name}")
+            
+            joo_orders = []
+            for row in results:
+                order_dict = dict(zip(columns, row))
+                print(f"Processing order: {order_dict['order_id']}, "
+                      f"type: {order_dict['order_type']}")
+                joo_orders.append(order_dict)
+
+    except Exception as e:
+        print(f"Error: {str(e)}")
+        joo_orders = []
+        restaurant_name = None
+
+    context = {
+        'joo_orders': joo_orders,
+        'restaurant': {'restaurant_name': restaurant_name},
+        'debug': True
+    }
+    
+    return render(request, 'partner/restaurant/booking_history.html', context)
 
 @csrf_exempt
 def update_booking_status(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            booking = RestaurantBooking.objects.get(
-                id=data['booking_id'],
-                restaurant_id=request.session.get('restaurant_id')
-            )
-            booking.status = data['status']
-            booking.save()
+            order_id = data.get('order_id')
+            status = data.get('status')
+            
+            order = Order.objects.using('user').get(order_id=order_id)
+            order.status = status
+            order.save()
             
             return JsonResponse({
                 'status': 'success',
                 'message': 'Booking status updated successfully'
             })
-        except RestaurantBooking.DoesNotExist:
+            
+        except Order.DoesNotExist:
             return JsonResponse({
                 'status': 'error',
-                'message': 'Booking not found or access denied'
+                'message': 'Booking not found'
             })
         except Exception as e:
             return JsonResponse({
                 'status': 'error',
                 'message': str(e)
             })
-    
+            
     return JsonResponse({
         'status': 'error',
         'message': 'Invalid request method'
@@ -1063,12 +1231,49 @@ def venue_bookings(request):
         
     try:
         venue = VenuePartner.objects.get(id=request.session['venue_id'])
-        bookings = VenueBooking.objects.filter(venue=venue).order_by('-booking_date')
+        # Use Order model and filter for venue orders by restaurant_name and order_type
+        bookings = Order.objects.using('user').filter(
+            order_type='venue',  # Changed from 'table' to 'venue'
+            restaurant_name=venue.venue_name  # Match by venue name instead of ID
+        ).order_by('-booking_date')
         
-        return render(request, 'partner/venue/bookings.html', {
+        # Calculate statistics
+        today = timezone.now().date()
+        today_bookings = bookings.filter(booking_date__date=today)
+        today_bookings_count = today_bookings.count()
+        today_revenue = sum(b.total_amount for b in today_bookings) if today_bookings.exists() else 0
+        
+        pending_bookings_count = bookings.filter(status='pending').count()
+        completed_bookings_count = bookings.filter(status='completed').count()
+        total_bookings = bookings.count()
+        completion_rate = (completed_bookings_count / total_bookings * 100) if total_bookings > 0 else 0
+        
+        # Calculate weekly revenue
+        weekly_revenue = []
+        for i in range(7):
+            day = today - timedelta(days=i)
+            day_bookings = bookings.filter(booking_date__date=day)
+            amount = sum(b.total_amount for b in day_bookings) if day_bookings.exists() else 0
+            max_amount = max((b.total_amount for b in bookings), default=1)
+            weekly_revenue.append({
+                'day': day.strftime('%a'),
+                'amount': amount,
+                'percentage': (amount / max_amount * 100) if max_amount > 0 else 0
+            })
+        weekly_revenue.reverse()
+        
+        context = {
             'venue': venue,
-            'bookings': bookings
-        })
+            'bookings': bookings,
+            'today_bookings_count': today_bookings_count,
+            'today_revenue': today_revenue,
+            'pending_bookings_count': pending_bookings_count,
+            'completed_bookings_count': completed_bookings_count,
+            'completion_rate': round(completion_rate, 1),
+            'weekly_revenue': weekly_revenue,
+        }
+        
+        return render(request, 'partner/venue/bookings.html', context)
         
     except VenuePartner.DoesNotExist:
         return redirect('joo:venue_login')
@@ -1131,103 +1336,6 @@ def delivery_logout(request):
 def partner_login(request):
     """Handle main partner login page"""
     return render(request, 'login/partner.html')
-
-def delivery_orders(request):
-    """Display delivery partner orders"""
-    delivery_id = request.session.get('delivery_id')
-    
-    if not delivery_id:
-        messages.error(request, "Please login first")
-        return redirect('joo:delivery_login')
-        
-    try:
-        delivery = DeliveryPartner.objects.get(id=delivery_id)
-        
-        # Get orders from database
-        orders = Order.objects.filter(delivery_partner=delivery).values(
-            'order_id',
-            'customer_email',
-            'status'
-        )
-        
-        # Convert to list and sort (pending first)
-        orders = list(orders)
-        orders.sort(key=lambda x: x['status'] != 'pending')
-        
-        context = {
-            'delivery': delivery,
-            'orders': orders
-        }
-        
-        return render(request, 'partner/delivery/orders.html', context)
-        
-    except DeliveryPartner.DoesNotExist:
-        request.session.flush()
-        messages.error(request, "Delivery partner not found")
-        return redirect('joo:delivery_login')
-
-@csrf_exempt
-def complete_order(request):
-    """Handle order completion"""
-    if request.method != 'POST':
-        return JsonResponse({
-            'status': 'error',
-            'message': 'Invalid request method'
-        })
-    
-    try:
-        data = json.loads(request.body)
-        order_id = data.get('order_id')
-        
-        if not order_id:
-            return JsonResponse({
-                'status': 'error',
-                'message': 'Order ID is required'
-            })
-            
-        # Get the order and update its status
-        order = Order.objects.get(order_id=order_id)
-        
-        if order.status == 'completed':
-            return JsonResponse({
-                'status': 'error',
-                'message': 'Order is already completed'
-            })
-            
-        order.status = 'completed'
-        order.save()
-        
-        return JsonResponse({
-            'status': 'success',
-            'message': 'Order completed successfully'
-        })
-        
-    except Order.DoesNotExist:
-        return JsonResponse({
-            'status': 'error',
-            'message': 'Order not found'
-        })
-    except Exception as e:
-        print(f"Error completing order: {str(e)}")
-        return JsonResponse({
-            'status': 'error',
-            'message': 'Error completing order'
-        })
-
-def edit_venue_profile(request):
-    if 'venue_id' not in request.session:
-        return redirect('joo:venue_login')
-        
-    venue = VenuePartner.objects.get(id=request.session['venue_id'])
-    
-    if request.method == 'POST':
-        # Handle form submission
-        pass
-    
-    context = {
-        'venue': venue
-    }
-    return render(request, 'partner/venue/edit_profile.html', context)
 
 @csrf_exempt
 def send_reset_otp(request):

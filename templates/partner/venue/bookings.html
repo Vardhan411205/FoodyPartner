@@ -5,24 +5,133 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bookings - {{ request.session.venue_name }}</title>
-    <link rel="stylesheet" href="{% static 'css/common.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-            background: #f5f5f5;
+        * {
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
         }
 
-        .main-content {
-            margin-top: 60px;
+        /* Updated Secondary Navigation Styles */
+        .secondary-nav {
+            background-color: #fc8019;
+            padding: 15px 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            border-bottom: 1px solid #e8e8e8;
+        }
+
+        .nav-content {
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            width: 100%;
+            position: relative;
+        }
+
+        .brand {
+            color: white;
+            font-size: 1.8rem;
+            font-weight: bold;
+            text-decoration: none;
+            position: relative;
+            transition: transform 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .brand:hover {
+            opacity: 0.9;
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+        }
+
+        .desktop-menu {
+            display: flex;
+            gap: 25px;
+        }
+
+        .desktop-menu a {
+            color: white;
+            text-decoration: none;
+            font-size: 1rem;
+            position: relative;
+            padding: 5px 0;
+            margin: 0 5px;
+        }
+
+        .desktop-menu a::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            bottom: -2px;
+            left: 0;
+            background-color: white;
+            transform: scaleX(0);
+            transform-origin: bottom right;
+            transition: transform 0.3s ease-out;
+        }
+
+        .desktop-menu a:hover::after {
+            transform: scaleX(1);
+            transform-origin: bottom left;
+        }
+
+        .profile-pic-placeholder {
+            width: 45px;
+            height: 45px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fc8019;
+            font-size: 20px;
+            border: 2px solid white;
+        }
+
+        .partner-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .partner-label {
+            font-size: 12px;
+            opacity: 0.9;
+            color: white;
+        }
+
+        .restaurant-name {
+            font-size: 16px;
+            font-weight: 500;
+            color: white;
+        }
+
+        /* Dashboard Container Styles */
+        .dashboard-container {
+            margin-top: 80px;
             padding: 20px;
             max-width: 1200px;
             margin-left: auto;
             margin-right: auto;
         }
 
+        /* Bookings Table Styles */
         .bookings-container {
             background: white;
             padding: 30px;
@@ -31,35 +140,13 @@
         }
 
         .page-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
 
         .page-header h1 {
             font-size: 24px;
             color: #333;
             margin: 0;
-        }
-
-        .filter-section {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .filter-group {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .filter-group select {
-            padding: 8px 12px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 14px;
         }
 
         .bookings-table {
@@ -70,7 +157,6 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
         }
 
         th, td {
@@ -113,7 +199,7 @@
             border-radius: 6px;
             cursor: pointer;
             font-size: 14px;
-            display: flex;
+            display: inline-flex;
             align-items: center;
             gap: 6px;
             transition: all 0.3s;
@@ -127,6 +213,7 @@
         .cancel-btn {
             background: #dc3545;
             color: white;
+            margin-left: 8px;
         }
 
         .action-btn:hover {
@@ -134,172 +221,7 @@
             transform: translateY(-1px);
         }
 
-        .action-buttons {
-            display: flex;
-            gap: 8px;
-        }
-
-        .no-bookings {
-            text-align: center;
-            padding: 40px;
-            color: #666;
-            font-style: italic;
-        }
-
-        /* Modal Styles */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 1000;
-        }
-
-        .modal-content {
-            position: relative;
-            background: white;
-            width: 90%;
-            max-width: 600px;
-            margin: 50px auto;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-        }
-
-        .close-modal {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            font-size: 24px;
-            cursor: pointer;
-            color: #666;
-        }
-
-        .booking-details {
-            margin-top: 20px;
-        }
-
-        .detail-row {
-            display: flex;
-            margin-bottom: 15px;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 15px;
-        }
-
-        .detail-label {
-            width: 150px;
-            font-weight: 500;
-            color: #666;
-        }
-
-        .detail-value {
-            flex: 1;
-            color: #333;
-        }
-
-        /* Navigation Styles */
-        .secondary-nav {
-            background-color: #fc8019;
-            padding: 15px 0;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
-            border-bottom: 1px solid #e8e8e8;
-        }
-
-        .nav-content {
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 20px;
-            width: 100%;
-            position: relative;
-        }
-
-        .brand {
-            color: white;
-            font-size: 1.8rem;
-            font-weight: bold;
-            text-decoration: none;
-            position: relative;
-            transition: transform 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .brand:hover {
-            opacity: 0.9;
-        }
-
-        .profile-pic-placeholder {
-            width: 45px;
-            height: 45px;
-            background: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #fc8019;
-            font-size: 20px;
-            border: 2px solid white;
-        }
-
-        .partner-details {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .partner-label {
-            font-size: 12px;
-            opacity: 0.9;
-            color: white;
-        }
-
-        .restaurant-name {
-            font-size: 16px;
-            font-weight: 500;
-            color: white;
-        }
-
-        .desktop-menu {
-            display: flex;
-            gap: 25px;
-        }
-
-        .desktop-menu a {
-            color: white;
-            text-decoration: none;
-            font-size: 1rem;
-            position: relative;
-            padding: 5px 0;
-            margin: 0 5px;
-        }
-
-        .desktop-menu a::after {
-            content: '';
-            position: absolute;
-            width: 100%;
-            height: 2px;
-            bottom: -2px;
-            left: 0;
-            background-color: white;
-            transform: scaleX(0);
-            transform-origin: bottom right;
-            transition: transform 0.3s ease-out;
-        }
-
-        .desktop-menu a:hover::after {
-            transform: scaleX(1);
-            transform-origin: bottom left;
-        }
-
+        /* Updated Mobile Menu Styles */
         .mobile-menu {
             display: none;
         }
@@ -328,8 +250,8 @@
                 display: none;
                 position: absolute;
                 top: 100%;
-                right: 0;
-                min-width: 200px;
+                right: 0;  /* Align to right */
+                min-width: 200px;  /* Fixed width */
                 background: white;
                 padding: 10px 0;
                 border-radius: 8px;
@@ -343,11 +265,11 @@
 
             .dropdown-menu a {
                 padding: 12px 20px;
-                color: #333;
+                color: #333;  /* Darker text color */
                 text-decoration: none;
                 display: block;
                 transition: background 0.3s;
-                white-space: nowrap;
+                white-space: nowrap;  /* Prevent text wrapping */
             }
 
             .dropdown-menu a:hover {
@@ -359,6 +281,7 @@
                 background: #fff3e6;
             }
 
+            /* Add arrow to dropdown */
             .dropdown-menu::before {
                 content: '';
                 position: absolute;
@@ -405,31 +328,10 @@
         </div>
     </nav>
 
-    <div class="main-content">
+    <div class="dashboard-container">
         <div class="bookings-container">
             <div class="page-header">
-                <h1>Venue Bookings</h1>
-            </div>
-
-            <div class="filter-section">
-                <div class="filter-group">
-                    <label>Status:</label>
-                    <select id="status-filter">
-                        <option value="all">All</option>
-                        <option value="pending">Pending</option>
-                        <option value="completed">Completed</option>
-                        <option value="cancelled">Cancelled</option>
-                    </select>
-                </div>
-                <div class="filter-group">
-                    <label>Date:</label>
-                    <select id="date-filter">
-                        <option value="all">All Time</option>
-                        <option value="today">Today</option>
-                        <option value="week">This Week</option>
-                        <option value="month">This Month</option>
-                    </select>
-                </div>
+                <h1>Recent Bookings</h1>
             </div>
 
             <div class="bookings-table">
@@ -438,9 +340,8 @@
                         <tr>
                             <th>Order ID</th>
                             <th>Customer Email</th>
-                            <th>Venue Email</th>
                             <th>Date</th>
-                            <th>Time</th>
+                            <th>Amount</th>
                             <th>Status</th>
                             <th>Actions</th>
                         </tr>
@@ -451,21 +352,20 @@
                                 <tr>
                                     <td>#{{ booking.order_id }}</td>
                                     <td>{{ booking.customer_email }}</td>
-                                    <td>{{ booking.venue_email }}</td>
                                     <td>{{ booking.booking_date|date:"d M Y" }}</td>
-                                    <td>{{ booking.booking_date|time:"h:i A" }}</td>
+                                    <td>₹{{ booking.total_amount }}</td>
                                     <td>
                                         <span class="status-badge {{ booking.status }}">
-                                            {{ booking.get_status_display }}
+                                            {{ booking.status|title }}
                                         </span>
                                     </td>
                                     <td>
                                         <div class="action-buttons">
                                             {% if booking.status == 'pending' %}
-                                                <button class="action-btn complete-btn" onclick="updateStatus('{{ booking.id }}', 'completed')">
+                                                <button class="action-btn complete-btn" onclick="updateStatus('{{ booking.order_id }}', 'completed')">
                                                     <i class="fas fa-check"></i> Complete
                                                 </button>
-                                                <button class="action-btn cancel-btn" onclick="updateStatus('{{ booking.id }}', 'cancelled')">
+                                                <button class="action-btn cancel-btn" onclick="updateStatus('{{ booking.order_id }}', 'cancelled')">
                                                     <i class="fas fa-times"></i> Cancel
                                                 </button>
                                             {% endif %}
@@ -475,7 +375,7 @@
                             {% endfor %}
                         {% else %}
                             <tr>
-                                <td colspan="7" class="no-bookings">No bookings found</td>
+                                <td colspan="6" class="no-bookings">No bookings found</td>
                             </tr>
                         {% endif %}
                     </tbody>
@@ -484,41 +384,8 @@
         </div>
     </div>
 
-    <!-- Booking Details Modal -->
-    <div id="bookingModal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal" onclick="closeModal()">&times;</span>
-            <h2>Booking Details</h2>
-            <div class="booking-details" id="bookingDetails">
-                <!-- Details will be populated dynamically -->
-            </div>
-        </div>
-    </div>
-
     <script>
-        // Filter functionality
-        document.getElementById('status-filter').addEventListener('change', filterBookings);
-        document.getElementById('date-filter').addEventListener('change', filterBookings);
-
-        function filterBookings() {
-            // Implement filtering logic here
-        }
-
-        function viewBooking(bookingId) {
-            // Show booking details in modal
-            const modal = document.getElementById('bookingModal');
-            modal.style.display = 'block';
-            
-            // Fetch and display booking details
-            fetchBookingDetails(bookingId);
-        }
-
-        function closeModal() {
-            const modal = document.getElementById('bookingModal');
-            modal.style.display = 'none';
-        }
-
-        function updateStatus(bookingId, status) {
+        function updateStatus(orderId, status) {
             if (confirm(`Are you sure you want to mark this booking as ${status}?`)) {
                 fetch('{% url "joo:update_booking_status" %}', {
                     method: 'POST',
@@ -527,7 +394,7 @@
                         'X-CSRFToken': '{{ csrf_token }}'
                     },
                     body: JSON.stringify({
-                        booking_id: bookingId,
+                        order_id: orderId,
                         status: status
                     })
                 })
@@ -543,61 +410,6 @@
                     console.error('Error:', error);
                     alert('Error updating booking status');
                 });
-            }
-        }
-
-        async function fetchBookingDetails(bookingId) {
-            try {
-                const response = await fetch(`/api/bookings/${bookingId}/`);
-                const data = await response.json();
-                
-                // Populate modal with booking details
-                const detailsContainer = document.getElementById('bookingDetails');
-                detailsContainer.innerHTML = `
-                    <div class="detail-row">
-                        <div class="detail-label">Booking ID:</div>
-                        <div class="detail-value">#${data.booking_id}</div>
-                    </div>
-                    <div class="detail-row">
-                        <div class="detail-label">Customer Name:</div>
-                        <div class="detail-value">${data.customer_name}</div>
-                    </div>
-                    <div class="detail-row">
-                        <div class="detail-label">Event Date:</div>
-                        <div class="detail-value">${data.event_date}</div>
-                    </div>
-                    <div class="detail-row">
-                        <div class="detail-label">Event Type:</div>
-                        <div class="detail-value">${data.event_type}</div>
-                    </div>
-                    <div class="detail-row">
-                        <div class="detail-label">Guest Count:</div>
-                        <div class="detail-value">${data.guest_count}</div>
-                    </div>
-                    <div class="detail-row">
-                        <div class="detail-label">Amount:</div>
-                        <div class="detail-value">₹${data.amount}</div>
-                    </div>
-                    <div class="detail-row">
-                        <div class="detail-label">Status:</div>
-                        <div class="detail-value">
-                            <span class="status-badge ${data.status.toLowerCase()}">
-                                ${data.status}
-                            </span>
-                        </div>
-                    </div>
-                `;
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Error fetching booking details');
-            }
-        }
-
-        // Close modal when clicking outside
-        window.onclick = function(event) {
-            const modal = document.getElementById('bookingModal');
-            if (event.target == modal) {
-                modal.style.display = 'none';
             }
         }
 

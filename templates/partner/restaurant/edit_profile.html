@@ -15,7 +15,7 @@
     <style>
         * {
             box-sizing: border-box;
-            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
             margin: 0;
             padding: 0;
         }
@@ -751,10 +751,13 @@
             </div>
             <div class="nav-right">
                 <div class="desktop-menu">
-                    <a href="{% url 'joo:update_restaurant_profile' %}" class="active">Edit Profile</a>
+                    <a href="{% url 'joo:update_restaurant_profile' %}">Edit Profile</a>
                     <a href="{% url 'joo:restaurant_food_items' %}">Food Items</a>
                     <a href="{% url 'joo:restaurant_dining_tables' %}">Dining Tables</a>
-                    <a href="{% url 'joo:restaurant_booking_history' %}">Bookings</a>
+                    <a href="{% url 'joo:restaurant_booking_history' %}" class="nav-link">
+                        <i class="fas fa-history"></i>
+                        <span>Orders & Bookings History</span>
+                    </a>
                     <a href="{% url 'joo:restaurant_logout' %}">Logout</a>
                 </div>
                 <div class="mobile-menu">
@@ -762,10 +765,13 @@
                         <i class="fas fa-bars"></i>
                     </button>
                     <div class="dropdown-menu">
-                        <a href="{% url 'joo:update_restaurant_profile' %}" class="active">Edit Profile</a>
+                        <a href="{% url 'joo:update_restaurant_profile' %}">Edit Profile</a>
                         <a href="{% url 'joo:restaurant_food_items' %}">Food Items</a>
                         <a href="{% url 'joo:restaurant_dining_tables' %}">Dining Tables</a>
-                        <a href="{% url 'joo:restaurant_booking_history' %}">Bookings</a>
+                        <a href="{% url 'joo:restaurant_booking_history' %}" class="nav-link">
+                            <i class="fas fa-history"></i>
+                            <span>Orders & Bookings History</span>
+                        </a>
                         <a href="{% url 'joo:restaurant_logout' %}">Logout</a>
                     </div>
                 </div>

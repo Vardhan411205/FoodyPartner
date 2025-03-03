@@ -1,62 +1,59 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-echo "Starting build process..."
+# Exit on error
+set -o errexit
 
-# Activate virtual environment if it exists
-if [ -d "venv" ]; then
-    echo "Activating virtual environment..."
-    source venv/bin/activate
-fi
+# Debugging information
+echo "BUILD_ENV: $BUILD_ENV"
+echo "PYTHON_VERSION: $PYTHON_VERSION"
+echo "Working directory: $(pwd)"
 
-# Install or upgrade pip
-echo "Upgrading pip..."
+# Python upgrade and setup
+echo "Installing Python dependencies..."
 python -m pip install --upgrade pip
+pip install -r requirements.txt
 
-# Install requirements
-echo "Installing requirements..."
-if [ -f "requirements.txt" ]; then
-    pip install -r requirements.txt
-else
-    echo "Warning: requirements.txt not found"
-fi
+# Django commands
+echo "Running Django commands..."
 
 # Collect static files
 echo "Collecting static files..."
 python manage.py collectstatic --noinput
 
-# Run migrations
+# Run migrations for both databases
 echo "Running database migrations..."
 python manage.py makemigrations
-python manage.py migrate
+python manage.py migrate --database=default
+python manage.py migrate --database=user
 
-# Clear Python cache files
+# Clean up cache
 echo "Cleaning up cache files..."
 find . -type d -name "__pycache__" -exec rm -r {} +
 find . -type f -name "*.pyc" -delete
 
-# Run tests if they exist
-echo "Running tests..."
-python manage.py test
+# Security check
+echo "Running security checks..."
+python manage.py check --deploy
 
-# Check for deployment environment
-if [ "$DJANGO_SETTINGS_MODULE" = "production" ]; then
-    echo "Deploying to production..."
-    # Add production-specific commands here
-    
-    # Restart Gunicorn if it's being used
-    if command -v gunicorn &> /dev/null; then
-        echo "Restarting Gunicorn..."
-        sudo systemctl restart gunicorn
-    fi
-    
-    # Restart Nginx if it's being used
-    if command -v nginx &> /dev/null; then
-        echo "Restarting Nginx..."
-        sudo systemctl restart nginx
-    fi
+# Verify static files
+echo "Verifying static files..."
+if [ -d "staticfiles" ]; then
+    echo "Static files collected successfully"
 else
-    echo "Starting development server..."
-    python manage.py runserver
+    echo "Warning: staticfiles directory not found"
 fi
 
-echo "Build process completed!"
+# Production specific commands
+if [ "$BUILD_ENV" = "production" ]; then
+    echo "Running production setup..."
+    
+    # Compress static files
+    if command -v gzip &> /dev/null; then
+        find staticfiles -type f -regextype posix-extended -regex ".*\.(css|js|txt|html|xml)" -exec gzip -f -k {} \;
+    fi
+    
+    # Set proper permissions
+    chmod -R 755 staticfiles/
+fi
+
+echo "Build completed successfully!"

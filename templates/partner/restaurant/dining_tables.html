@@ -9,7 +9,7 @@
     <style>
         * {
             box-sizing: border-box;
-            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
             margin: 0;
             padding: 0;
         }
@@ -793,7 +793,7 @@
                     </div>
                     <div class="partner-details">
                         <span class="partner-label">Restaurant Partner</span>
-                        <span class="restaurant-name">mine</span>
+                        <span class="restaurant-name">{{ request.session.restaurant_name }}</span>
                     </div>
                 </a>
             </div>
@@ -801,8 +801,11 @@
                 <div class="desktop-menu">
                     <a href="{% url 'joo:update_restaurant_profile' %}">Edit Profile</a>
                     <a href="{% url 'joo:restaurant_food_items' %}">Food Items</a>
-                    <a href="{% url 'joo:restaurant_dining_tables' %}" class="active">Dining Tables</a>
-                    <a href="{% url 'joo:restaurant_booking_history' %}">Bookings</a>
+                    <a href="{% url 'joo:restaurant_dining_tables' %}">Dining Tables</a>
+                    <a href="{% url 'joo:restaurant_booking_history' %}" class="nav-link">
+                        <i class="fas fa-history"></i>
+                        <span>Orders & Bookings History</span>
+                    </a>
                     <a href="{% url 'joo:restaurant_logout' %}">Logout</a>
                 </div>
                 <div class="mobile-menu">
@@ -812,8 +815,11 @@
                     <div class="dropdown-menu">
                         <a href="{% url 'joo:update_restaurant_profile' %}">Edit Profile</a>
                         <a href="{% url 'joo:restaurant_food_items' %}">Food Items</a>
-                        <a href="{% url 'joo:restaurant_dining_tables' %}" class="active">Dining Tables</a>
-                        <a href="{% url 'joo:restaurant_booking_history' %}">Bookings</a>
+                        <a href="{% url 'joo:restaurant_dining_tables' %}">Dining Tables</a>
+                        <a href="{% url 'joo:restaurant_booking_history' %}" class="nav-link">
+                            <i class="fas fa-history"></i>
+                            <span>Orders & Bookings History</span>
+                        </a>
                         <a href="{% url 'joo:restaurant_logout' %}">Logout</a>
                     </div>
                 </div>
@@ -896,6 +902,7 @@
                     <thead>
                         <tr>
                             <th>Table Number</th>
+                            <th>Restaurant Name</th>
                             <th>Category</th>
                             <th>Capacity</th>
                             <th>Price (4 Hours)</th>
@@ -908,6 +915,7 @@
                         {% for table in tables %}
                         <tr data-id="{{ table.id }}">
                             <td>{{ table.table_number }}</td>
+                            <td>{{ table.restaurant_name }}</td>
                             <td>
                                 <span class="category-badge category-{{ table.category|lower }}">
                                     {{ table.category|title }}

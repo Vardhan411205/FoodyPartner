@@ -20,7 +20,7 @@
 
         body {
             background: #fc8019;
-            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
             margin: 0;
             padding: 0;
         }
@@ -149,6 +149,43 @@
             z-index: 2;
         }
 
+        .verify-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .verify-btn.sending {
+            background: #ffa559;
+            cursor: wait;
+        }
+
+        .verify-btn.verified {
+            background: #28a745;
+            cursor: default;
+        }
+
+        /* OTP verification button */
+        .verify-otp-btn {
+            width: 100%;
+            padding: 10px;
+            background: #fc8019;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .verify-otp-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .verify-otp-btn:hover:not(:disabled) {
+            background: #e67215;
+        }
+
         /* Password field specific styles */
         .form-group input[type="password"] {
             padding-right: 45px;
@@ -256,24 +293,231 @@
         /* Responsive styles */
         @media (max-width: 768px) {
             .login-container {
-                margin: 10px;
+                width: 95%;
+                margin: 10px auto;
                 padding: 15px;
             }
 
+            .form-section {
+                padding: 15px;
+                margin-bottom: 15px;
+            }
+
+            .form-section h3 {
+                font-size: 16px;
+                margin-bottom: 12px;
+                padding-bottom: 6px;
+            }
+
+            /* Reduce form group spacing */
+            .form-group {
+                margin-bottom: 15px;
+            }
+
+            .form-group input,
+            .form-group select {
+                padding: 10px 12px;
+                padding-left: 30px;
+                font-size: 14px;
+            }
+
+            /* Adjust icon sizes */
+            .form-group i:not(.toggle-password) {
+                font-size: 12px;
+                left: 10px;
+            }
+
+            /* Make logo smaller on mobile */
             .logo img {
-                width: 100px;
-                height: 100px;
+                width: 80px;
+                height: 80px;
             }
 
-            #map {
-                height: 300px;
+            /* Adjust venue image upload section */
+            .image-upload-container {
+                padding: 15px;
             }
 
+            .image-preview {
+                width: 120px;
+                height: 120px;
+            }
+
+            .upload-btn {
+                padding: 8px 15px;
+                font-size: 13px;
+            }
+
+            /* Adjust OTP inputs */
+            .otp-inputs {
+                gap: 8px;
+            }
+
+            .otp-input {
+                width: 35px;
+                height: 35px;
+                font-size: 16px;
+            }
+
+            /* Adjust buttons */
+            .verify-btn {
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+
+            .verify-otp-btn {
+                width: 100%;
+                padding: 10px;
+                font-size: 14px;
+            }
+
+            /* Adjust terms checkbox */
+            .terms-checkbox {
+                margin: 15px 0;
+            }
+
+            .terms-checkbox label {
+                font-size: 12px;
+            }
+
+            /* Two-column layout for related fields */
+            .form-row {
+                display: flex;
+                gap: 10px;
+                margin-bottom: 10px;
+            }
+
+            .form-row .form-group {
+                flex: 1;
+                margin-bottom: 0;
+            }
+
+            /* Price and capacity fields in one row */
+            .venue-details-row {
+                display: flex;
+                gap: 10px;
+            }
+
+            .venue-details-row .form-group {
+                flex: 1;
+            }
+
+            /* Adjust section margins */
+            .form-section + .form-section {
+                margin-top: 15px;
+            }
+
+            /* Make headings more compact */
+            h2 {
+                font-size: 18px;
+                margin-bottom: 10px;
+            }
+
+            .subtitle {
+                font-size: 14px;
+                margin-bottom: 20px;
+            }
+
+            /* Adjust alert messages */
+            .alert {
+                padding: 10px;
+                font-size: 13px;
+                margin-bottom: 15px;
+            }
+
+            /* Make dropdown menus more touch-friendly */
+            .form-group select {
+                height: 40px;
+            }
+
+            /* Adjust back button */
             .corner-back-btn {
+                padding: 8px 15px;
+                font-size: 13px;
                 top: 10px;
                 left: 10px;
-                padding: 8px 16px;
+            }
+
+            /* Adjust file input and image preview */
+            .image-upload-section {
+                padding: 10px;
+            }
+
+            .file-input-wrapper {
+                margin: 10px 0;
+            }
+
+            .file-input-label {
+                padding: 8px 15px;
+                font-size: 13px;
+            }
+
+            /* Register button */
+            .register-btn {
+                padding: 12px;
                 font-size: 14px;
+                margin-top: 15px;
+            }
+        }
+
+        /* Add smooth transitions */
+        .form-group input,
+        .form-group select,
+        .verify-btn,
+        .verify-otp-btn,
+        .register-btn {
+            transition: all 0.3s ease;
+        }
+
+        /* Improve touch targets */
+        @media (max-width: 768px) {
+            .toggle-password {
+                width: 40px;
+                height: 40px;
+            }
+
+            .form-group input:focus,
+            .form-group select:focus {
+                transform: scale(1.01);
+            }
+
+            /* Add some spacing between sections */
+            .form-section {
+                border-bottom: 1px solid #eee;
+                padding-bottom: 20px;
+            }
+
+            .form-section:last-child {
+                border-bottom: none;
+            }
+
+            /* Improve image upload experience */
+            .image-upload-hint {
+                font-size: 12px;
+                margin: 8px 0;
+            }
+
+            .image-preview-container {
+                margin: 10px auto;
+            }
+
+            /* Price input specific styling */
+            .price-input-group {
+                position: relative;
+            }
+
+            .price-input-group::before {
+                content: '₹';
+                position: absolute;
+                left: 30px;
+                top: 50%;
+                transform: translateY(-50%);
+                font-size: 14px;
+                color: #666;
+            }
+
+            .price-input-group input {
+                padding-left: 45px;
             }
         }
 
@@ -294,6 +538,19 @@
         .subtitle {
             color: #666;
             font-size: 16px;
+            margin: 0;
+        }
+
+        /* Update the number input styles */
+        .form-group input[type="number"] {
+            appearance: textfield;
+            -moz-appearance: textfield;
+        }
+
+        .form-group input[type="number"]::-webkit-outer-spin-button,
+        .form-group input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            appearance: none;
             margin: 0;
         }
     </style>
@@ -372,6 +629,15 @@
                     <div class="form-group">
                         <i class="fas fa-users"></i>
                         <input type="number" id="seating-capacity" placeholder="Seating Capacity" required>
+                    </div><br>
+                    <div class="form-group">
+                        <i class="fas fa-rupee-sign"></i>
+                        <input type="number" 
+                               id="venue-price" 
+                               placeholder="Venue Price per Day (₹)" 
+                               step="0.01" 
+                               min="0" 
+                               required>
                     </div><br>
                     <div class="form-section">
                         <h3>Location</h3>
@@ -470,6 +736,7 @@
             const verifyBtn = document.getElementById('verify-email-btn');
             verifyBtn.disabled = true;
             verifyBtn.textContent = 'Sending...';
+            verifyBtn.classList.add('sending');
 
             fetch('{% url "joo:send_otp" %}', {
                 method: 'POST',
@@ -485,6 +752,7 @@
             .then(data => {
                 verifyBtn.disabled = false;
                 verifyBtn.textContent = 'Verify';
+                verifyBtn.classList.remove('sending');
                 
                 if (data.status === 'success') {
                     document.getElementById('otp-container').style.display = 'block';
@@ -497,6 +765,7 @@
                 console.error('Error:', error);
                 verifyBtn.disabled = false;
                 verifyBtn.textContent = 'Verify';
+                verifyBtn.classList.remove('sending');
                 alert('Error sending OTP: ' + error.message);
             });
         }
@@ -592,7 +861,8 @@
                     phone: document.getElementById('phone').value,
                     venue_type: document.getElementById('venue-type').value,
                     seating_capacity: parseInt(document.getElementById('seating-capacity').value),
-                    address: address, // Add the address from location input
+                    price: parseFloat(document.getElementById('venue-price').value),
+                    address: address,
                     venue_image: document.getElementById('venue-image')?.value || '',
                     password: document.getElementById('password').value
                 };

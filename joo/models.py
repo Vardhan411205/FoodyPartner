@@ -2,6 +2,7 @@ from django.db import models
 from django.utils import timezone
 from django.core.validators import MinValueValidator, MaxValueValidator
 from decimal import Decimal
+import hashlib
 
 class DeliveryPartner(models.Model):
     VEHICLE_CHOICES = [
@@ -77,6 +78,7 @@ class VenuePartner(models.Model):
     password = models.CharField(max_length=128)
     created_at = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True)
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
 
     class Meta:
         db_table = 'joo_venuepartner'
@@ -84,25 +86,41 @@ class VenuePartner(models.Model):
     def __str__(self):
         return self.venue_name
 
+    def set_password(self, password):
+        """Hash and set the password"""
+        self.password = hashlib.sha256(password.encode()).hexdigest()
+
 class OTPVerification(models.Model):
     email = models.EmailField()
     otp = models.CharField(max_length=6)
-    purpose = models.CharField(max_length=20)  # For different types of verification
-    created_at = models.DateTimeField(auto_now_add=True)
+    purpose = models.CharField(max_length=20)  # 'restaurant', 'venue', 'delivery'
     is_verified = models.BooleanField(default=False)
-    
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField(default=timezone.now)
+
     class Meta:
         db_table = 'joo_otpverification'
-        ordering = ['-created_at']
 
     def __str__(self):
         return f"{self.email} - {self.purpose} - {self.created_at}"
 
 class FoodItem(models.Model):
-    restaurant = models.ForeignKey(RestaurantPartner, on_delete=models.CASCADE)
-    name = models.CharField(max_length=100)
+    restaurant = models.ForeignKey(RestaurantPartner, on_delete=models.CASCADE, related_name='food_items')
+    name = models.CharField(max_length=255)
+    restaurant_name = models.CharField(max_length=255, blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    category = models.CharField(max_length=50)
+    category = models.CharField(max_length=50, choices=[
+        ('chinese_main_course', 'Chinese Main Course'),
+        ('ice_creams', 'Ice Creams'),
+        ('desserts', 'Desserts'),
+        ('pizzas', 'Pizzas'),
+        ('milk_shakes', 'Milk Shakes'),
+        ('south_indian', 'South Indian'),
+        ('sandwiches', 'Sandwiches'),
+        ('north_indian', 'North Indian'),
+        ('shawarmas', 'Shawarmas'),
+        ('biriyani', 'Biriyani'),
+    ])
     image_url = models.URLField(max_length=500, blank=True, null=True)
     rating = models.DecimalField(max_digits=3, decimal_places=1, default=0)
     is_available = models.BooleanField(default=True)
@@ -111,8 +129,12 @@ class FoodItem(models.Model):
     class Meta:
         ordering = ['category', 'name']
 
+    def save(self, *args, **kwargs):
+        self.restaurant_name = self.restaurant.restaurant_name
+        super().save(*args, **kwargs)
+
     def __str__(self):
-        return f"{self.name} - {self.restaurant.restaurant_name}"
+        return f"{self.name} - {self.restaurant_name}"
 
 class DiningTable(models.Model):
     STATUS_CHOICES = [
@@ -129,6 +151,7 @@ class DiningTable(models.Model):
     ]
     
     restaurant = models.ForeignKey(RestaurantPartner, on_delete=models.CASCADE)
+    restaurant_name = models.CharField(max_length=255, blank=True)
     table_number = models.CharField(max_length=20)
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='casual')
     seating_capacity = models.IntegerField(
@@ -150,8 +173,12 @@ class DiningTable(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def save(self, *args, **kwargs):
+        self.restaurant_name = self.restaurant.restaurant_name
+        super().save(*args, **kwargs)
+
     def __str__(self):
-        return f"Table {self.table_number} - {self.restaurant.restaurant_name}"
+        return f"Table {self.table_number} - {self.restaurant_name}"
 
     class Meta:
         ordering = ['table_number']
@@ -214,77 +241,39 @@ class EventPackage(models.Model):
         return f"{self.name} - {self.venue.venue_name}"
 
 class Order(models.Model):
-    STATUS_CHOICES = (
+    STATUS_CHOICES = [
         ('pending', 'Pending'),
-        ('completed', 'Completed')
-    )
-    
-    order_id = models.CharField(max_length=10, unique=True)
-    customer_email = models.EmailField()
-    delivery_partner = models.ForeignKey(DeliveryPartner, on_delete=models.CASCADE)
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        ordering = ['-created_at']
-
-    def __str__(self):
-        return f"Order #{self.order_id}"
-
-class VenueBooking(models.Model):
-    STATUS_CHOICES = (
-        ('pending', 'Pending'),
+        ('confirmed', 'Confirmed'),
         ('completed', 'Completed'),
-        ('cancelled', 'Cancelled')
-    )
+        ('cancelled', 'Cancelled'),
+    ]
     
-    order_id = models.CharField(max_length=50, unique=True)
-    customer_email = models.EmailField()
-    venue_email = models.EmailField(default='')
-    booking_date = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
-    venue = models.ForeignKey(VenuePartner, on_delete=models.CASCADE)
-    created_at = models.DateTimeField(default=timezone.now)
-    updated_at = models.DateTimeField(default=timezone.now)
-
-    def __str__(self):
-        return f"Booking {self.order_id} - {self.status}"
-
-    def save(self, *args, **kwargs):
-        if not self.venue_email and self.venue:
-            self.venue_email = self.venue.email
-        if not self.pk:
-            self.created_at = timezone.now()
-        self.updated_at = timezone.now()
-        super().save(*args, **kwargs)
-
-class RestaurantBooking(models.Model):
-    STATUS_CHOICES = (
-        ('pending', 'Pending'),
-        ('completed', 'Completed'),
-        ('cancelled', 'Cancelled')
-    )
+    ORDER_TYPES = [
+        ('food', 'Food Order'),
+        ('table', 'Table Booking'),
+    ]
     
-    order_id = models.CharField(max_length=50, unique=True)
+    id = models.AutoField(primary_key=True)
+    order_id = models.CharField(max_length=255, unique=True)
     customer_email = models.EmailField()
-    restaurant_email = models.EmailField(default='')
+    restaurant_id = models.IntegerField()
+    restaurant_email = models.EmailField()
+    restaurant_name = models.CharField(max_length=255)
     booking_date = models.DateTimeField()
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
-    restaurant = models.ForeignKey(RestaurantPartner, on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    order_type = models.CharField(max_length=20)
+    status = models.CharField(max_length=20)
+    items = models.TextField()
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    created_at = models.DateTimeField()
+    updated_at = models.DateTimeField()
 
     class Meta:
+        db_table = 'joo_order'
+        managed = False  # Don't manage this table through Django
         ordering = ['-booking_date']
 
     def __str__(self):
-        return f"Booking {self.order_id} - {self.status}"
-
-    def save(self, *args, **kwargs):
-        if not self.restaurant_email and self.restaurant:
-            self.restaurant_email = self.restaurant.email
-        super().save(*args, **kwargs)
+        return f"{self.order_type} {self.order_id} - {self.restaurant_name}"
 
 class ResetPassword(models.Model):
     PARTNER_CHOICES = (
@@ -300,6 +289,9 @@ class ResetPassword(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
     expires_at = models.DateTimeField()
 
+    class Meta:
+        db_table = 'joo_resetpassword'
+
     def __str__(self):
         return f"Reset password for {self.email} ({self.partner_type})"
 
@@ -312,3 +304,7 @@ class ResetPassword(models.Model):
     @property
     def is_expired(self):
         return timezone.now() > self.expires_at
+
+# Remove or comment out the incomplete VenueBooking model
+# class VenueBooking(models.Model):
+#     ...
