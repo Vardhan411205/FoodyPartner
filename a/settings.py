@@ -22,7 +22,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('SECRET_KEY')
+SECRET_KEY = 'django-insecure-#!t0hvnz9&d9ngs&smcn-4@e&0t@)1ijp3m8-6_f&c*&ft=gbw'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = 'RENDER' not in os.environ
@@ -87,17 +87,21 @@ DATABASES = {
         conn_health_checks=True,
         ssl_require=True
     ),
-    'user': dj_database_url.config(
-        env='USER_DATABASE_URL',
-        default=os.environ.get('USER_DATABASE_URL'),
-        conn_max_age=600,
-        conn_health_checks=True,
-        ssl_require=True
-    )
+    'user': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('DB_NAME'),
+        'USER': os.environ.get('DB_USER'),
+        'PASSWORD': os.environ.get('DB_PASSWORD'),
+        'HOST': os.environ.get('DB_HOST'),
+        'PORT': os.environ.get('DB_PORT'),
+        'OPTIONS': {
+            'sslmode': 'require',
+        }
+    }
 }
 
-# Update the database router path to match your project
-DATABASE_ROUTERS = ['a.routers.UserRouter']
+# Add the database router
+DATABASE_ROUTERS = ['foodproject.routers.UserRouter']
 
 
 # Password validation
@@ -154,9 +158,9 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
-DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL')
+EMAIL_HOST_USER = 'mr.foodyandms.foody@gmail.com'
+EMAIL_HOST_PASSWORD = 'cexu ptrm cnqw jfob'
+DEFAULT_FROM_EMAIL = 'mr.foodyandms.foody@gmail.com'
 
 # Add these settings
 AUTHENTICATION_BACKENDS = [
@@ -171,5 +175,5 @@ if RENDER_EXTERNAL_HOSTNAME:
 # Session settings
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 SESSION_COOKIE_AGE = 86400  # 24 hours in seconds
-SESSION_COOKIE_SECURE = not DEBUG  # Set to True in production
+SESSION_COOKIE_SECURE = False  # Set to True in production with HTTPS
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
