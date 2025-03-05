@@ -8,207 +8,9 @@
     <link rel="stylesheet" href="{% static 'css/common.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* Copy all the navigation styles from delivery_dashboard.html */
         * {
             box-sizing: border-box;
             font-family: 'Arial', sans-serif;
-        }
-
-        /* Secondary Navigation Styles */
-        .secondary-nav {
-            background-color: #fc8019;
-            padding: 15px 0;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .nav-content {
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 20px;
-            width: 100%;
-            position: relative;
-        }
-
-        .nav-left {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .brand {
-            text-decoration: none;
-            color: white;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            transition: opacity 0.3s ease;
-        }
-
-        .brand:hover {
-            opacity: 0.9;
-        }
-
-        .profile-pic-placeholder {
-            width: 45px;
-            height: 45px;
-            background: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #fc8019;
-            font-size: 20px;
-            border: 2px solid white;
-        }
-
-        .partner-details {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .partner-label {
-            font-size: 12px;
-            opacity: 0.9;
-        }
-
-        .delivery-name {
-            font-size: 16px;
-            font-weight: 500;
-        }
-
-        /* Desktop Menu Styles */
-        .desktop-menu {
-            display: flex;
-            gap: 25px;
-        }
-
-        .desktop-menu a {
-            color: white;
-            text-decoration: none;
-            font-size: 1rem;
-            position: relative;
-            padding: 5px 0;
-            margin: 0 5px;
-        }
-
-        .desktop-menu a::after {
-            content: '';
-            position: absolute;
-            width: 100%;
-            height: 2px;
-            bottom: -2px;
-            left: 0;
-            background-color: white;
-            transform: scaleX(0);
-            transform-origin: bottom right;
-            transition: transform 0.3s ease-out;
-        }
-
-        .desktop-menu a:hover::after {
-            transform: scaleX(1);
-            transform-origin: bottom left;
-        }
-
-        /* Mobile Menu Styles */
-        .mobile-menu {
-            display: none;
-        }
-
-        .menu-toggle {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 1.5rem;
-            cursor: pointer;
-            padding: 5px;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .menu-toggle:hover {
-            transform: rotate(90deg);
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-        }
-
-        .mobile-menu.active .menu-toggle {
-            transform: rotate(180deg);
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-        }
-
-        .dropdown-menu {
-            display: none;
-            position: absolute;
-            top: 100%;
-            right: 20px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-            padding: 10px 0;
-            min-width: 200px;
-            z-index: 1001;
-            animation: slideIn 0.3s ease-out;
-            border: 1px solid rgba(252, 128, 25, 0.1);
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .dropdown-menu a {
-            display: block;
-            padding: 10px 20px;
-            color: #fc8019;
-            text-decoration: none;
-            transition: all 0.2s ease-out;
-            position: relative;
-            padding-left: 30px;
-            background: transparent;
-        }
-
-        .dropdown-menu a:hover {
-            background: #fff5ee;
-            color: #e67312;
-            transform: translateX(5px);
-        }
-
-        .dropdown-menu a::before {
-            content: '';
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            width: 6px;
-            height: 6px;
-            background: #fc8019;
-            border-radius: 50%;
-            transform: translateY(-50%) scale(0);
-            opacity: 0;
-            transition: all 0.2s ease-out;
-        }
-
-        .dropdown-menu a:hover::before {
-            transform: translateY(-50%) scale(1) rotate(0);
-            opacity: 1;
-        }
-
-        .dropdown-menu a:not(:last-child) {
-            border-bottom: 1px solid rgba(252, 128, 25, 0.1);
         }
 
         /* Keep your existing edit profile form styles */
@@ -362,89 +164,22 @@
 
         /* Responsive styles */
         @media (max-width: 768px) {
-            .desktop-menu {
-                display: none;
-            }
-
-            .mobile-menu {
-                display: block;
-                position: relative;
-            }
-
-            .mobile-menu.active .dropdown-menu {
-                display: block;
-            }
-
-            .nav-content {
-                padding: 0 15px;
-            }
-
-            .dropdown-menu {
-                right: 0;
-                left: auto;
-                width: 200px;
-                margin: 10px 15px;
-                position: absolute;
-            }
-            
-            .mobile-menu {
-                position: static;
-            }
-            
-            .dropdown-menu {
-                position: absolute;
-                top: 100%;
-                right: 15px;
+            .edit-profile-form {
+                margin: 80px 15px 20px;
+                padding: 20px;
             }
         }
 
         @media (max-width: 480px) {
-            .nav-content {
-                padding: 0 10px;
-            }
-            
-            .dropdown-menu {
-                right: 10px;
-                margin: 10px 10px;
-                max-width: calc(100% - 20px);
+            .edit-profile-form {
+                margin: 80px 10px 20px;
+                padding: 15px;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Replace the old header with the new navigation -->
-    <nav class="secondary-nav">
-        <div class="nav-content">
-            <div class="nav-left">
-                <a href="{% url 'joo:delivery_dashboard' %}" class="brand">
-                    <div class="profile-pic-placeholder">
-                        <i class="fas fa-motorcycle"></i>
-                    </div>
-                    <div class="partner-details">
-                        <span class="partner-label">Delivery Partner</span>
-                        <span class="delivery-name">{{ request.session.delivery_name }}</span>
-                    </div>
-                </a>
-            </div>
-            <div class="nav-right">
-                <div class="desktop-menu">
-                    <a href="{% url 'joo:delivery_edit_profile' %}" class="active">Edit Profile</a>
-                    <a href="{% url 'joo:delivery_orders' %}">Orders</a>
-                    <a href="{% url 'joo:delivery_logout' %}">Logout</a>
-                </div>
-                <div class="mobile-menu">
-                    <button class="menu-toggle">
-                        <i class="fas fa-bars"></i>
-                    </button>
-                    <div class="dropdown-menu">
-                        <a href="{% url 'joo:delivery_edit_profile' %}" class="active">Edit Profile</a>
-                        <a href="{% url 'joo:delivery_orders' %}">Orders</a>
-                        <a href="{% url 'joo:delivery_logout' %}">Logout</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </nav>
+    {% include 'partner/delivery/header.html' %}
 
     <!-- Edit Profile Form -->
     <div class="edit-profile-form">
@@ -517,22 +252,6 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const menuToggle = document.querySelector('.menu-toggle');
-            const mobileMenu = document.querySelector('.mobile-menu');
-
-            menuToggle.addEventListener('click', function() {
-                mobileMenu.classList.toggle('active');
-            });
-
-            // Close menu when clicking outside
-            document.addEventListener('click', function(e) {
-                if (!mobileMenu.contains(e.target)) {
-                    mobileMenu.classList.remove('active');
-                }
-            });
-        });
-
         // Form submission
         document.getElementById('editProfileForm').addEventListener('submit', async function(e) {
             e.preventDefault();

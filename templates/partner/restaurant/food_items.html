@@ -19,6 +19,12 @@
             background: #f8f9fa;
         }
 
+        /* Food Items Content Styles */
+        .main-content {
+            margin-top: 80px;
+            padding: 30px;
+        }
+
         /* Navigation Styles */
         .secondary-nav {
             background-color: #fc8019;
@@ -228,12 +234,6 @@
             .mobile-menu.active .dropdown-menu {
                 display: block;
             }
-        }
-
-        /* Food Items Content Styles */
-        .main-content {
-            margin-top: 80px;
-            padding: 30px;
         }
 
         .food-items-form {
@@ -633,49 +633,7 @@
     </style>
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="secondary-nav">
-        <div class="nav-content">
-            <div class="nav-left">
-                <a href="{% url 'joo:restaurant_dashboard' %}" class="brand">
-                    <div class="profile-pic-placeholder">
-                        <i class="fas fa-store"></i>
-                    </div>
-                    <div class="partner-details">
-                        <span class="partner-label">Restaurant Partner</span>
-                        <span class="restaurant-name">{{ request.session.restaurant_name }}</span>
-                    </div>
-                </a>
-            </div>
-            <div class="nav-right">
-                <div class="desktop-menu">
-                    <a href="{% url 'joo:update_restaurant_profile' %}">Edit Profile</a>
-                    <a href="{% url 'joo:restaurant_food_items' %}">Food Items</a>
-                    <a href="{% url 'joo:restaurant_dining_tables' %}">Dining Tables</a>
-                    <a href="{% url 'joo:restaurant_booking_history' %}" class="nav-link">
-                        <i class="fas fa-history"></i>
-                        <span>Orders & Bookings History</span>
-                    </a>
-                    <a href="{% url 'joo:restaurant_logout' %}">Logout</a>
-                </div>
-                <div class="mobile-menu">
-                    <button class="menu-toggle">
-                        <i class="fas fa-bars"></i>
-                    </button>
-                    <div class="dropdown-menu">
-                        <a href="{% url 'joo:update_restaurant_profile' %}">Edit Profile</a>
-                        <a href="{% url 'joo:restaurant_food_items' %}">Food Items</a>
-                        <a href="{% url 'joo:restaurant_dining_tables' %}">Dining Tables</a>
-                        <a href="{% url 'joo:restaurant_booking_history' %}" class="nav-link">
-                            <i class="fas fa-history"></i>
-                            <span>Orders & Bookings History</span>
-                        </a>
-                        <a href="{% url 'joo:restaurant_logout' %}">Logout</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </nav>
+    {% include 'partner/restaurant/header.html' %}
 
     <div class="main-content">
         <div class="food-items-form">
@@ -818,36 +776,6 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const menuToggle = document.querySelector('.menu-toggle');
-            const mobileMenu = document.querySelector('.mobile-menu');
-
-            // Toggle mobile menu
-            menuToggle.addEventListener('click', function(e) {
-                e.stopPropagation();
-                mobileMenu.classList.toggle('active');
-                
-                // Add rotation to the hamburger icon
-                this.style.transform = mobileMenu.classList.contains('active') 
-                    ? 'rotate(90deg)' 
-                    : 'rotate(0deg)';
-            });
-
-            // Close menu when clicking outside
-            document.addEventListener('click', function(e) {
-                if (!mobileMenu.contains(e.target)) {
-                    mobileMenu.classList.remove('active');
-                    menuToggle.style.transform = 'rotate(0deg)';
-                }
-            });
-
-            // Prevent dropdown from closing when clicking inside it
-            const dropdown = document.querySelector('.dropdown-menu');
-            dropdown.addEventListener('click', function(e) {
-                e.stopPropagation();
-            });
-        });
-
         // Image preview functionality
         document.getElementById('image_url').addEventListener('input', function(e) {
             const url = e.target.value;
@@ -893,6 +821,25 @@
             return cookieValue;
         }
 
+        // Add event listeners for edit and delete buttons
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add event listeners to all edit buttons
+            document.querySelectorAll('.edit-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const itemId = this.dataset.id;
+                    editItem(itemId);
+                });
+            });
+
+            // Add event listeners to all delete buttons
+            document.querySelectorAll('.delete-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const itemId = this.dataset.id;
+                    deleteItem(itemId);
+                });
+            });
+        });
+
         // Update the form submission code
         document.getElementById('addItemForm').addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -905,12 +852,18 @@
                 
                 const formData = {
                     action: 'add',
-                    name: document.getElementById('name').value,
-                    price: document.getElementById('price').value,
+                    name: document.getElementById('name').value.trim(),
+                    price: parseFloat(document.getElementById('price').value),
                     category: document.getElementById('category').value,
-                    image_url: document.getElementById('image_url').value,
-                    rating: document.getElementById('rating').value
+                    image_url: document.getElementById('image_url').value.trim(),
+                    rating: parseFloat(document.getElementById('rating').value),
+                    restaurant_id: document.querySelector('input[name="restaurant_id"]').value
                 };
+
+                // Validate required fields
+                if (!formData.name || !formData.price || !formData.category || !formData.image_url) {
+                    throw new Error('Please fill in all required fields');
+                }
                 
                 const response = await fetch('{% url "joo:restaurant_food_items" %}', {
                     method: 'POST',
@@ -919,7 +872,7 @@
                         'X-CSRFToken': getCookie('csrftoken')
                     },
                     body: JSON.stringify(formData),
-                    credentials: 'same-origin' // Important for session handling
+                    credentials: 'same-origin'
                 });
                 
                 if (!response.ok) {
@@ -980,23 +933,27 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
                     },
                     body: JSON.stringify({
                         action: 'delete',
                         item_id: itemId,
                         restaurant_email: email
-                    })
+                    }),
+                    credentials: 'same-origin'
                 });
                 
                 const data = await response.json();
                 
                 if (data.status === 'success') {
                     row.remove();
+                    showAlert('success', 'Item deleted successfully!');
                 } else {
                     throw new Error(data.message || 'Failed to delete item');
                 }
             } catch (error) {
-                alert(error.message);
+                showAlert('error', error.message);
+                console.error('Error:', error);
             }
         }
 
@@ -1004,54 +961,64 @@
         async function editItem(itemId) {
             const row = document.querySelector(`.food-items-table tbody tr[data-id="${itemId}"]`);
             const name = row.querySelector('td:nth-child(2)').textContent;
-            const price = row.querySelector('td:nth-child(4)').textContent.replace('₹', '');
-            const category = row.querySelector('td:nth-child(3)').textContent;
+            const category = row.querySelector('td:nth-child(4)').textContent;
+            const price = row.querySelector('.price').textContent.replace('₹', '');
             const image = row.querySelector('.food-item-image').src;
             const email = row.dataset.email;
             
+            // Store original content for cancel operation
+            row.dataset.originalContent = row.innerHTML;
+            
             // Convert row to edit form
-            row.innerHTML = `
-                <form class="edit-item-form" onsubmit="saveEdit(event, ${itemId})">
-                    <input type="hidden" name="restaurant_email" value="${email}">
-                    <div class="form-group">
-                        <label>Name</label>
-                        <input type="text" name="name" value="${name}" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Price (₹)</label>
-                        <input type="number" name="price" value="${price}" min="0" step="0.01" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Category</label>
-                        <select name="category" required>
-                            <option value="chinese_main_course" ${category === 'Chinese Main Course' ? 'selected' : ''}>Chinese Main Course</option>
-                            <option value="ice_creams" ${category === 'Ice Creams' ? 'selected' : ''}>Ice Creams</option>
-                            <option value="desserts" ${category === 'Desserts' ? 'selected' : ''}>Desserts</option>
-                            <option value="pizzas" ${category === 'Pizzas' ? 'selected' : ''}>Pizzas</option>
-                            <option value="milk_shakes" ${category === 'Milk Shakes' ? 'selected' : ''}>Milk Shakes</option>
-                            <option value="south_indian" ${category === 'South Indian' ? 'selected' : ''}>South Indian</option>
-                            <option value="sandwiches" ${category === 'Sandwiches' ? 'selected' : ''}>Sandwiches</option>
-                            <option value="north_indian" ${category === 'North Indian' ? 'selected' : ''}>North Indian</option>
-                            <option value="shawarmas" ${category === 'Shawarmas' ? 'selected' : ''}>Shawarmas</option>
-                            <option value="biriyani" ${category === 'Biriyani' ? 'selected' : ''}>Biriyani</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Image URL</label>
-                        <input type="text" name="image" value="${image}" required>
-                    </div>
-                    <div class="action-buttons">
-                        <button type="submit" class="edit-btn">
-                            <i class="fas fa-save"></i>
-                            Save
-                        </button>
-                        <button type="button" class="delete-btn" onclick="cancelEdit(${itemId})">
-                            <i class="fas fa-times"></i>
-                            Cancel
-                        </button>
-                    </div>
-                </form>
+            const editFormHtml = `
+                <td colspan="7">
+                    <form onsubmit="saveEdit(event, ${itemId})" class="edit-form">
+                        <input type="hidden" name="restaurant_email" value="${email}">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; padding: 15px;">
+                            <div class="form-group">
+                                <label>Name</label>
+                                <input type="text" name="name" value="${name}" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Price (₹)</label>
+                                <input type="number" name="price" value="${price}" min="0" step="0.01" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Category</label>
+                                <select name="category" class="form-input" required>
+                                    <option value="chinese_main_course" ${category === 'Chinese Main Course' ? 'selected' : ''}>Chinese Main Course</option>
+                                    <option value="ice_creams" ${category === 'Ice Creams' ? 'selected' : ''}>Ice Creams</option>
+                                    <option value="desserts" ${category === 'Desserts' ? 'selected' : ''}>Desserts</option>
+                                    <option value="pizzas" ${category === 'Pizzas' ? 'selected' : ''}>Pizzas</option>
+                                    <option value="milk_shakes" ${category === 'Milk Shakes' ? 'selected' : ''}>Milk Shakes</option>
+                                    <option value="south_indian" ${category === 'South Indian' ? 'selected' : ''}>South Indian</option>
+                                    <option value="sandwiches" ${category === 'Sandwiches' ? 'selected' : ''}>Sandwiches</option>
+                                    <option value="north_indian" ${category === 'North Indian' ? 'selected' : ''}>North Indian</option>
+                                    <option value="shawarmas" ${category === 'Shawarmas' ? 'selected' : ''}>Shawarmas</option>
+                                    <option value="biriyani" ${category === 'Biriyani' ? 'selected' : ''}>Biriyani</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Image URL</label>
+                                <input type="url" name="image" value="${image}" class="form-input" required>
+                            </div>
+                        </div>
+                        <div style="display: flex; justify-content: flex-end; gap: 10px; padding: 15px;">
+                            <button type="submit" class="edit-btn">
+                                <i class="fas fa-save"></i>
+                                Save
+                            </button>
+                            <button type="button" class="delete-btn" onclick="cancelEdit(${itemId})">
+                                <i class="fas fa-times"></i>
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+                </td>
             `;
+            
+            // Replace row content with edit form
+            row.innerHTML = editFormHtml;
         }
 
         // Save edited item
@@ -1060,44 +1027,86 @@
             const form = e.target;
             
             try {
+                const formData = {
+                    action: 'edit',
+                    item_id: itemId,
+                    restaurant_email: form.querySelector('[name="restaurant_email"]').value,
+                    name: form.querySelector('[name="name"]').value,
+                    price: form.querySelector('[name="price"]').value,
+                    category: form.querySelector('[name="category"]').value,
+                    image_url: form.querySelector('[name="image"]').value
+                };
+
                 const response = await fetch('{% url "joo:restaurant_food_items" %}', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
                     },
-                    body: JSON.stringify({
-                        action: 'edit',
-                        item_id: itemId,
-                        restaurant_email: form.restaurant_email.value,
-                        name: form.name.value,
-                        price: form.price.value,
-                        category: form.category.value,
-                        image: form.image.value
-                    })
+                    body: JSON.stringify(formData)
                 });
                 
                 const data = await response.json();
                 
                 if (data.status === 'success') {
-                    window.location.reload();
+                    showAlert('success', 'Item updated successfully!');
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
                 } else {
                     throw new Error(data.message || 'Failed to update item');
                 }
             } catch (error) {
-                alert(error.message);
+                showAlert('error', error.message);
             }
         }
 
         // Cancel edit
         function cancelEdit(itemId) {
-            window.location.reload();
+            const row = document.querySelector(`.food-items-table tbody tr[data-id="${itemId}"]`);
+            if (row && row.dataset.originalContent) {
+                row.innerHTML = row.dataset.originalContent;
+                // Reattach event listeners
+                attachEventListeners(row);
+            }
         }
 
-        // Add this new function
-        function showAddItemForm() {
-            const addItemSection = document.querySelector('.add-item-section');
-            addItemSection.style.display = 'block';
-            addItemSection.scrollIntoView({ behavior: 'smooth' });
+        // Function to attach event listeners to a row
+        function attachEventListeners(row) {
+            const editBtn = row.querySelector('.edit-btn');
+            const deleteBtn = row.querySelector('.delete-btn');
+            
+            if (editBtn) {
+                editBtn.addEventListener('click', function() {
+                    editItem(row.dataset.id);
+                });
+            }
+            
+            if (deleteBtn) {
+                deleteBtn.addEventListener('click', function() {
+                    deleteItem(row.dataset.id);
+                });
+            }
+        }
+
+        // Attach event listeners when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add event listeners to all rows
+            document.querySelectorAll('.food-items-table tbody tr').forEach(row => {
+                attachEventListeners(row);
+            });
+        });
+
+        // Helper function to show alerts
+        function showAlert(type, message) {
+            const alert = document.getElementById('alert');
+            alert.className = `alert alert-${type}`;
+            alert.innerHTML = `<i class="fas fa-${type === 'success' ? 'check' : 'exclamation'}-circle"></i> ${message}`;
+            alert.style.display = 'flex';
+            
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, type === 'success' ? 2000 : 5000);
         }
 
         // Add search functionality
@@ -1106,8 +1115,8 @@
             const rows = document.querySelectorAll('.food-items-table tbody tr');
             
             rows.forEach(row => {
-                const name = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
-                const category = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
+                const name = row.querySelector('td:nth-child(2)')?.textContent.toLowerCase() || '';
+                const category = row.querySelector('td:nth-child(4)')?.textContent.toLowerCase() || '';
                 
                 if (name.includes(searchTerm) || category.includes(searchTerm)) {
                     row.style.display = '';

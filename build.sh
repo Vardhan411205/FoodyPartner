@@ -23,6 +23,7 @@ python manage.py collectstatic --noinput
 # Run migrations for both databases
 echo "Running database migrations..."
 python manage.py makemigrations
+python manage.py migrate
 python manage.py migrate --database=default
 python manage.py migrate --database=user
 

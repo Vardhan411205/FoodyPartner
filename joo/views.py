@@ -137,7 +137,7 @@ def restaurant_login(request):
             
             # Store restaurant info in session
             request.session['restaurant_id'] = restaurant.id
-            request.session['restaurant_name'] = "3000"  # Set this to match the database
+            request.session['restaurant_name'] = restaurant.restaurant_name
             request.session['restaurant_email'] = restaurant.email
             
             return JsonResponse({
@@ -681,7 +681,10 @@ def update_restaurant_profile(request):
 def restaurant_food_items(request):
     """Handle restaurant food items"""
     if 'restaurant_id' not in request.session:
-        return redirect('joo:restaurant_login')
+        return JsonResponse({
+            'status': 'error',
+            'message': 'Please login to continue'
+        }, status=401)
     
     try:
         restaurant = RestaurantPartner.objects.get(id=request.session['restaurant_id'])
@@ -691,47 +694,88 @@ def restaurant_food_items(request):
                 # Parse JSON data if it's an AJAX request
                 if request.headers.get('Content-Type') == 'application/json':
                     data = json.loads(request.body)
-                    name = data.get('name')
-                    price = data.get('price')
-                    category = data.get('category')
-                    image_url = data.get('image_url')
-                    rating = data.get('rating', 0)
-                    is_available = data.get('is_available', True)  # Default to True if not provided
-                else:
-                    # Get data from POST request
-                    name = request.POST.get('name')
-                    price = request.POST.get('price')
-                    category = request.POST.get('category')
-                    image_url = request.POST.get('image_url')
-                    rating = request.POST.get('rating', 0)
-                    is_available = request.POST.get('is_available', 'true') == 'true'
+                    action = data.get('action')
 
-                # Create new food item
-                food_item = FoodItem.objects.create(
-                    restaurant=restaurant,
-                    name=name,
-                    restaurant_name=restaurant.restaurant_name,
-                    price=price,
-                    category=category,
-                    image_url=image_url,
-                    rating=rating,
-                    is_available=is_available
-                )
+                    if action == 'add':
+                        # Validate required fields
+                        required_fields = ['name', 'price', 'category', 'image_url']
+                        for field in required_fields:
+                            if not data.get(field):
+                                return JsonResponse({
+                                    'status': 'error',
+                                    'message': f'{field.replace("_", " ").title()} is required'
+                                })
 
-                return JsonResponse({
-                    'status': 'success',
-                    'message': 'Food item added successfully',
-                    'item': {
-                        'id': food_item.id,
-                        'name': food_item.name,
-                        'price': float(food_item.price),
-                        'category': food_item.category,
-                        'image_url': food_item.image_url,
-                        'rating': float(food_item.rating),
-                        'is_available': food_item.is_available
-                    }
-                })
+                        # Create new food item
+                        food_item = FoodItem.objects.create(
+                            restaurant=restaurant,
+                            name=data['name'],
+                            restaurant_name=restaurant.restaurant_name,
+                            price=data['price'],
+                            category=data['category'],
+                            image_url=data['image_url'],
+                            rating=float(data.get('rating', 0)),
+                            is_available=True
+                        )
+
+                        return JsonResponse({
+                            'status': 'success',
+                            'message': 'Food item added successfully',
+                            'item': {
+                                'id': food_item.id,
+                                'name': food_item.name,
+                                'price': float(food_item.price),
+                                'category': food_item.category,
+                                'image_url': food_item.image_url,
+                                'rating': float(food_item.rating),
+                                'is_available': food_item.is_available
+                            }
+                        })
+                    elif action == 'edit':
+                        # Handle edit action
+                        item_id = data.get('item_id')
+                        if not item_id:
+                            return JsonResponse({
+                                'status': 'error',
+                                'message': 'Item ID is required for editing'
+                            })
+
+                        food_item = FoodItem.objects.get(id=item_id, restaurant=restaurant)
+                        food_item.name = data.get('name', food_item.name)
+                        food_item.price = data.get('price', food_item.price)
+                        food_item.category = data.get('category', food_item.category)
+                        food_item.image_url = data.get('image_url', food_item.image_url)
+                        food_item.save()
+
+                        return JsonResponse({
+                            'status': 'success',
+                            'message': 'Food item updated successfully'
+                        })
+                    elif action == 'delete':
+                        # Handle delete action
+                        item_id = data.get('item_id')
+                        if not item_id:
+                            return JsonResponse({
+                                'status': 'error',
+                                'message': 'Item ID is required for deletion'
+                            })
+
+                        FoodItem.objects.filter(id=item_id, restaurant=restaurant).delete()
+                        return JsonResponse({
+                            'status': 'success',
+                            'message': 'Food item deleted successfully'
+                        })
+                    else:
+                        return JsonResponse({
+                            'status': 'error',
+                            'message': 'Invalid action'
+                        })
                 
+            except FoodItem.DoesNotExist:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Food item not found'
+                })
             except Exception as e:
                 return JsonResponse({
                     'status': 'error',
@@ -747,8 +791,10 @@ def restaurant_food_items(request):
         })
         
     except RestaurantPartner.DoesNotExist:
-        messages.error(request, "Restaurant not found")
-        return redirect('joo:restaurant_login')
+        return JsonResponse({
+            'status': 'error',
+            'message': 'Restaurant not found'
+        })
 
 @csrf_exempt
 def delivery_orders(request):
@@ -864,11 +910,15 @@ def complete_order(request):
 @csrf_exempt
 def restaurant_dining_tables(request):
     """Handle restaurant dining tables"""
-    if 'restaurant_id' not in request.session:
-        return redirect('joo:restaurant_login')
+    if 'restaurant_id' not in request.session or 'restaurant_name' not in request.session:
+        return JsonResponse({
+            'status': 'error',
+            'message': 'Please login first'
+        }) if request.headers.get('Content-Type') == 'application/json' else redirect('joo:restaurant_login')
     
     try:
         restaurant = RestaurantPartner.objects.get(id=request.session['restaurant_id'])
+        restaurant_name = request.session['restaurant_name']
         
         if request.method == 'POST':
             try:
@@ -877,10 +927,38 @@ def restaurant_dining_tables(request):
                     data = json.loads(request.body)
                     action = data.get('action')
                     
-                    if action == 'add':
+                    if action == 'get_tables':
+                        # Get tables filtered by restaurant name
+                        tables = DiningTable.objects.filter(
+                            restaurant=restaurant,
+                            restaurant_name=restaurant_name
+                        ).order_by('table_number')
+                        
+                        return JsonResponse({
+                            'status': 'success',
+                            'tables': [{
+                                'id': table.id,
+                                'table_number': table.table_number,
+                                'category': table.category,
+                                'seating_capacity': table.seating_capacity,
+                                'price': float(table.price),
+                                'rating': float(table.rating),
+                                'status': table.status,
+                                'image_url': table.image_url
+                            } for table in tables]
+                        })
+                    
+                    elif action == 'add':
+                        # Verify restaurant name matches
+                        if data.get('restaurant_name') != restaurant_name:
+                            return JsonResponse({
+                                'status': 'error',
+                                'message': 'Invalid restaurant name'
+                            })
+                            
                         table = DiningTable.objects.create(
                             restaurant=restaurant,
-                            restaurant_name=restaurant.restaurant_name,
+                            restaurant_name=restaurant_name,
                             table_number=data.get('table_number'),
                             category=data.get('category'),
                             seating_capacity=data.get('seating_capacity'),
@@ -905,13 +983,74 @@ def restaurant_dining_tables(request):
                             }
                         })
                     
-                    # Handle other actions (edit, delete) here...
+                    elif action == 'edit':
+                        table_id = data.get('table_id')
+                        if not table_id:
+                            return JsonResponse({
+                                'status': 'error',
+                                'message': 'Table ID is required'
+                            })
+                        
+                        table = DiningTable.objects.get(
+                            id=table_id,
+                            restaurant=restaurant,
+                            restaurant_name=restaurant_name
+                        )
+                        
+                        table.table_number = data.get('table_number', table.table_number)
+                        table.category = data.get('category', table.category)
+                        table.seating_capacity = data.get('seating_capacity', table.seating_capacity)
+                        table.price = data.get('price', table.price)
+                        table.rating = data.get('rating', table.rating)
+                        table.status = data.get('status', table.status)
+                        table.image_url = data.get('image_url', table.image_url)
+                        table.save()
+                        
+                        return JsonResponse({
+                            'status': 'success',
+                            'message': 'Table updated successfully',
+                            'table': {
+                                'id': table.id,
+                                'table_number': table.table_number,
+                                'category': table.category,
+                                'seating_capacity': table.seating_capacity,
+                                'price': float(table.price),
+                                'rating': float(table.rating),
+                                'status': table.status,
+                                'image_url': table.image_url
+                            }
+                        })
+                    
+                    elif action == 'delete':
+                        table_id = data.get('table_id')
+                        if not table_id:
+                            return JsonResponse({
+                                'status': 'error',
+                                'message': 'Table ID is required'
+                            })
+                        
+                        table = DiningTable.objects.get(
+                            id=table_id,
+                            restaurant=restaurant,
+                            restaurant_name=restaurant_name
+                        )
+                        table.delete()
+                        
+                        return JsonResponse({
+                            'status': 'success',
+                            'message': 'Table deleted successfully'
+                        })
                 
                 return JsonResponse({
                     'status': 'error',
                     'message': 'Invalid action'
                 })
                 
+            except DiningTable.DoesNotExist:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Table not found'
+                })
             except Exception as e:
                 return JsonResponse({
                     'status': 'error',
@@ -919,7 +1058,10 @@ def restaurant_dining_tables(request):
                 })
         
         # Get all tables for this restaurant
-        tables = DiningTable.objects.filter(restaurant=restaurant).order_by('table_number')
+        tables = DiningTable.objects.filter(
+            restaurant=restaurant,
+            restaurant_name=restaurant_name
+        ).order_by('table_number')
         
         return render(request, 'partner/restaurant/dining_tables.html', {
             'restaurant': restaurant,
@@ -927,33 +1069,23 @@ def restaurant_dining_tables(request):
         })
         
     except RestaurantPartner.DoesNotExist:
-        messages.error(request, "Restaurant not found")
-        return redirect('joo:restaurant_login')
+        return JsonResponse({
+            'status': 'error',
+            'message': 'Restaurant not found'
+        }) if request.headers.get('Content-Type') == 'application/json' else redirect('joo:restaurant_login')
 
 @csrf_exempt
 def restaurant_booking_history(request):
+    # Check if restaurant is logged in
+    if 'restaurant_id' not in request.session or 'restaurant_name' not in request.session:
+        return redirect('joo:restaurant_login')
+
     try:
+        restaurant_name = request.session['restaurant_name']
+        
         # Use the 'user' database connection where joo_order table exists
         with connections['user'].cursor() as cursor:
-            # First get the restaurant name
-            cursor.execute("""
-                SELECT DISTINCT restaurant_name 
-                FROM public.joo_order 
-                ORDER BY restaurant_name 
-                LIMIT 1;
-            """)
-            result = cursor.fetchone()
-            if result:
-                restaurant_name = result[0]  # This should be "3000"
-                print(f"Found restaurant name from database: {restaurant_name}")
-            else:
-                print("No restaurant found in database")
-                return render(request, 'partner/restaurant/booking_history.html', {
-                    'error': 'No restaurant found',
-                    'joo_orders': []
-                })
-
-            # Get the orders using the same connection
+            # Get the orders using the restaurant name from session
             query = """
                 SELECT order_id, customer_email, restaurant_id, 
                        restaurant_name, order_type, booking_date, status, items
@@ -966,24 +1098,20 @@ def restaurant_booking_history(request):
             
             columns = [col[0] for col in cursor.description]
             results = cursor.fetchall()
-            print(f"Found {len(results)} orders for restaurant {restaurant_name}")
             
             joo_orders = []
             for row in results:
                 order_dict = dict(zip(columns, row))
-                print(f"Processing order: {order_dict['order_id']}, "
-                      f"type: {order_dict['order_type']}")
                 joo_orders.append(order_dict)
 
     except Exception as e:
         print(f"Error: {str(e)}")
         joo_orders = []
-        restaurant_name = None
 
     context = {
         'joo_orders': joo_orders,
-        'restaurant': {'restaurant_name': restaurant_name},
-        'debug': True
+        'restaurant_name': restaurant_name,
+        'debug': True  # You can set this to False in production
     }
     
     return render(request, 'partner/restaurant/booking_history.html', context)

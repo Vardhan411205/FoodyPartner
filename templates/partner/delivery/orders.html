@@ -13,198 +13,6 @@
             font-family: 'Arial', sans-serif;
         }
 
-        /* Secondary Navigation Styles */
-        .secondary-nav {
-            background-color: #fc8019;
-            padding: 15px 0;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .nav-content {
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 20px;
-            width: 100%;
-            position: relative;
-        }
-
-        .nav-left {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            color: white;
-            text-decoration: none;
-        }
-
-        .profile-pic-placeholder {
-            width: 45px;
-            height: 45px;
-            background: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #fc8019;
-            font-size: 20px;
-            border: 2px solid white;
-        }
-
-        .partner-details {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .partner-label {
-            font-size: 12px;
-            opacity: 0.9;
-        }
-
-        .delivery-name {
-            font-size: 16px;
-            font-weight: 500;
-        }
-
-        /* Desktop Menu Styles */
-        .desktop-menu {
-            display: flex;
-            gap: 25px;
-        }
-
-        .desktop-menu a {
-            color: white;
-            text-decoration: none;
-            font-size: 1rem;
-            position: relative;
-            padding: 5px 0;
-            margin: 0 5px;
-        }
-
-        .desktop-menu a::after {
-            content: '';
-            position: absolute;
-            width: 100%;
-            height: 2px;
-            bottom: -2px;
-            left: 0;
-            background-color: white;
-            transform: scaleX(0);
-            transform-origin: bottom right;
-            transition: transform 0.3s ease-out;
-        }
-
-        .desktop-menu a:hover::after {
-            transform: scaleX(1);
-            transform-origin: bottom left;
-        }
-
-        /* Mobile Menu Styles */
-        .mobile-menu {
-            display: none;
-        }
-
-        .menu-toggle {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 1.5rem;
-            cursor: pointer;
-            padding: 5px;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .menu-toggle:hover {
-            transform: rotate(90deg);
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-        }
-
-        .mobile-menu.active .menu-toggle {
-            transform: rotate(180deg);
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-        }
-
-        .dropdown-menu {
-            display: none;
-            position: absolute;
-            top: 100%;
-            right: 20px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-            padding: 10px 0;
-            min-width: 200px;
-            z-index: 1001;
-            animation: slideIn 0.3s ease-out;
-            border: 1px solid rgba(252, 128, 25, 0.1);
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .dropdown-menu a {
-            display: block;
-            padding: 10px 20px;
-            color: #fc8019;
-            text-decoration: none;
-            transition: all 0.2s ease-out;
-            position: relative;
-            padding-left: 30px;
-            background: transparent;
-        }
-
-        .dropdown-menu a:hover {
-            background: #fff5ee;
-            color: #e67312;
-            transform: translateX(5px);
-        }
-
-        .dropdown-menu a::before {
-            content: '';
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            width: 6px;
-            height: 6px;
-            background: #fc8019;
-            border-radius: 50%;
-            transform: translateY(-50%) scale(0);
-            opacity: 0;
-            transition: all 0.2s ease-out;
-        }
-
-        .dropdown-menu a:hover::before {
-            transform: translateY(-50%) scale(1) rotate(0);
-            opacity: 1;
-        }
-
-        .dropdown-menu a:not(:last-child) {
-            border-bottom: 1px solid rgba(252, 128, 25, 0.1);
-        }
-
         /* Orders Page Specific Styles */
         .orders-container {
             max-width: 1200px;
@@ -251,100 +59,6 @@
             border-radius: 12px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
             overflow: hidden;
-        }
-
-        .order-item {
-            padding: 20px;
-            border-bottom: 1px solid #eee;
-            display: grid;
-            grid-template-columns: auto 1fr auto;
-            gap: 20px;
-            align-items: center;
-        }
-
-        .order-icon {
-            width: 50px;
-            height: 50px;
-            background: #fff3e6;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #fc8019;
-            font-size: 24px;
-        }
-
-        .order-details h3 {
-            margin: 0 0 5px;
-            color: #333;
-            font-size: 16px;
-        }
-
-        .order-info {
-            color: #666;
-            font-size: 14px;
-        }
-
-        .order-status {
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 500;
-        }
-
-        .status-pending {
-            background: #fff3e0;
-            color: #ef6c00;
-        }
-
-        .status-active {
-            background: #e3f2fd;
-            color: #1976d2;
-        }
-
-        .status-completed {
-            background: #e8f5e9;
-            color: #2e7d32;
-        }
-
-        .status-cancelled {
-            background: #ffebee;
-            color: #c62828;
-        }
-
-        /* Responsive Styles */
-        @media (max-width: 768px) {
-            .desktop-menu {
-                display: none;
-            }
-
-            .mobile-menu {
-                display: block;
-            }
-
-            .orders-header {
-                flex-direction: column;
-                gap: 15px;
-            }
-
-            .orders-filter {
-                width: 100%;
-                overflow-x: auto;
-                padding-bottom: 10px;
-            }
-
-            .filter-btn {
-                white-space: nowrap;
-            }
-
-            .order-item {
-                grid-template-columns: 1fr;
-                text-align: center;
-            }
-
-            .order-icon {
-                margin: 0 auto;
-            }
         }
 
         .orders-table {
@@ -424,132 +138,6 @@
             padding: 30px !important;
         }
 
-        /* Filter buttons */
-        .orders-filter {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .filter-btn {
-            padding: 8px 16px;
-            border: 1px solid #ddd;
-            border-radius: 20px;
-            background: white;
-            color: #666;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .filter-btn.active {
-            background: #fc8019;
-            color: white;
-            border-color: #fc8019;
-        }
-
-        @media (max-width: 768px) {
-            .orders-table {
-                min-width: 600px;
-            }
-
-            .orders-list {
-                overflow-x: auto;
-            }
-        }
-
-        /* Mobile Menu Styles */
-        @media (max-width: 768px) {
-            .desktop-menu {
-                display: none;
-            }
-
-            .mobile-menu {
-                display: block;
-                position: relative;
-            }
-
-            .menu-toggle {
-                background: none;
-                border: none;
-                color: white;
-                font-size: 1.5rem;
-                cursor: pointer;
-                padding: 8px;
-                transition: all 0.3s ease;
-                border-radius: 50%;
-            }
-
-            .menu-toggle:hover {
-                background: rgba(255, 255, 255, 0.1);
-            }
-
-            .dropdown-menu {
-                display: none;
-                position: absolute;
-                top: 100%;
-                right: 0;
-                background: white;
-                border-radius: 8px;
-                box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-                min-width: 200px;
-                z-index: 1000;
-                margin-top: 10px;
-            }
-
-            .mobile-menu.active .dropdown-menu {
-                display: block;
-                animation: slideIn 0.3s ease-out;
-            }
-
-            @keyframes slideIn {
-                from {
-                    opacity: 0;
-                    transform: translateY(-10px);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
-            }
-
-            .dropdown-menu a {
-                display: block;
-                padding: 12px 20px;
-                color: #333;
-                text-decoration: none;
-                transition: all 0.2s ease;
-                border-bottom: 1px solid #eee;
-            }
-
-            .dropdown-menu a:last-child {
-                border-bottom: none;
-            }
-
-            .dropdown-menu a:hover {
-                background: #f8f9fa;
-                padding-left: 25px;
-            }
-
-            .dropdown-menu a.active {
-                color: #fc8019;
-                background: #fff3e0;
-            }
-        }
-
-        /* Brand Link Styles */
-        .brand {
-            text-decoration: none;
-            color: white;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            transition: opacity 0.3s ease;
-        }
-
-        .brand:hover {
-            opacity: 0.9;
-        }
-
         /* Modal styles */
         .modal {
             display: none;
@@ -579,42 +167,43 @@
             font-size: 28px;
             cursor: pointer;
         }
+
+        /* Responsive styles */
+        @media (max-width: 768px) {
+            .orders-header {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .orders-filter {
+                width: 100%;
+                overflow-x: auto;
+                padding-bottom: 10px;
+            }
+
+            .filter-btn {
+                white-space: nowrap;
+            }
+
+            .orders-table {
+                min-width: 600px;
+            }
+
+            .orders-list {
+                overflow-x: auto;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .orders-container {
+                margin: 80px 10px 20px;
+                padding: 15px;
+            }
+        }
     </style>
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="secondary-nav">
-        <div class="nav-content">
-            <div class="nav-left">
-                <a href="{% url 'joo:delivery_dashboard' %}" class="brand">
-                    <div class="profile-pic-placeholder">
-                        <i class="fas fa-motorcycle"></i>
-                    </div>
-                    <div class="partner-details">
-                        <span class="partner-label">Delivery Partner</span>
-                        <span class="delivery-name">{{ request.session.delivery_name }}</span>
-                    </div>
-                </a>
-            </div>
-            <div class="nav-right">
-                <div class="desktop-menu">
-                    <a href="{% url 'joo:delivery_edit_profile' %}">Edit Profile</a>
-                    <a href="{% url 'joo:delivery_orders' %}" class="active">Orders</a>
-                    <a href="{% url 'joo:delivery_logout' %}">Logout</a>
-                </div>
-                <div class="mobile-menu">
-                    <button class="menu-toggle">
-                        <i class="fas fa-bars"></i>
-                    </button>
-                    <div class="dropdown-menu">
-                        <a href="{% url 'joo:delivery_edit_profile' %}">Edit Profile</a>
-                        <a href="{% url 'joo:delivery_orders' %}" class="active">Orders</a>
-                        <a href="{% url 'joo:delivery_logout' %}">Logout</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </nav>
+    {% include 'partner/delivery/header.html' %}
 
     <!-- Orders Content -->
     <div class="orders-container">
@@ -680,34 +269,6 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const menuToggle = document.querySelector('.menu-toggle');
-            const mobileMenu = document.querySelector('.mobile-menu');
-
-            // Toggle mobile menu
-            menuToggle.addEventListener('click', function(e) {
-                e.stopPropagation();
-                mobileMenu.classList.toggle('active');
-                
-                // Add rotation to the hamburger icon
-                this.style.transform = mobileMenu.classList.contains('active') 
-                    ? 'rotate(90deg)' 
-                    : 'rotate(0deg)';
-            });
-
-            // Close menu when clicking outside
-            document.addEventListener('click', function(e) {
-                if (!mobileMenu.contains(e.target)) {
-                    mobileMenu.classList.remove('active');
-                    menuToggle.style.transform = 'rotate(0deg)';
-                }
-            });
-
-            // Prevent dropdown from closing when clicking inside it
-            const dropdown = document.querySelector('.dropdown-menu');
-            dropdown.addEventListener('click', function(e) {
-                e.stopPropagation();
-            });
-
             // Filter functionality
             const filterButtons = document.querySelectorAll('.filter-btn');
             const orderRows = document.querySelectorAll('.order-row');

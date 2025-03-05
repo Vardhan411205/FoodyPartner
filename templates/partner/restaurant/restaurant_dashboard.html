@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ request.session.restaurant_name }} - Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -18,213 +19,73 @@
             background: #f8f9fa;
         }
 
-        /* Navigation Styles */
-        .secondary-nav {
-            background-color: #fc8019;
-            padding: 15px 0;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
-            border-bottom: 1px solid #e8e8e8;
-        }
-        
-        .nav-content {
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 20px;
-            width: 100%;
-            position: relative;
-        }
-
-        .brand {
-            color: white;
-            font-size: 1.8rem;
-            font-weight: bold;
-            text-decoration: none;
-            position: relative;
-            transition: transform 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .brand:hover {
-            opacity: 0.9;
-        }
-
-        .profile-pic-placeholder {
-            width: 45px;
-            height: 45px;
-            background: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #fc8019;
-            font-size: 20px;
-            border: 2px solid white;
-        }
-
-        .partner-details {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .partner-label {
-            font-size: 12px;
-            opacity: 0.9;
-            color: white;
-        }
-
-        .restaurant-name {
-            font-size: 16px;
-            font-weight: 500;
-            color: white;
-        }
-
-        .desktop-menu {
-            display: flex;
-            gap: 25px;
-        }
-
-        .desktop-menu a {
-            color: white;
-            text-decoration: none;
-            font-size: 1rem;
-            position: relative;
-            padding: 5px 0;
-            margin: 0 5px;
-        }
-
-        .desktop-menu a::after {
-            content: '';
-            position: absolute;
-            width: 100%;
-            height: 2px;
-            bottom: -2px;
-            left: 0;
-            background-color: white;
-            transform: scaleX(0);
-            transform-origin: bottom right;
-            transition: transform 0.3s ease-out;
-        }
-
-        .desktop-menu a:hover::after {
-            transform: scaleX(1);
-            transform-origin: bottom left;
-        }
-
-        .mobile-menu {
-            display: none;
-        }
-
-        .menu-toggle {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 1.5rem;
-            cursor: pointer;
-            padding: 5px;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .menu-toggle:hover {
-            transform: rotate(90deg);
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-        }
-
-        .dropdown-menu {
-            display: none;
-            position: absolute;
-            top: 100%;
-            right: 20px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-            padding: 10px 0;
-            min-width: 200px;
-            z-index: 1001;
-            animation: slideIn 0.3s ease-out;
-            border: 1px solid rgba(252, 128, 25, 0.1);
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .dropdown-menu a {
-            display: block;
-            padding: 10px 20px;
-            color: #fc8019;
-            text-decoration: none;
-            transition: all 0.2s ease-out;
-            position: relative;
-            padding-left: 30px;
-            background: transparent;
-        }
-
-        .dropdown-menu a:hover {
-            background: #fff5ee;
-            color: #e67312;
-            transform: translateX(5px);
-        }
-
-        .dropdown-menu a::before {
-            content: '';
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            width: 6px;
-            height: 6px;
-            background: #fc8019;
-            border-radius: 50%;
-            transform: translateY(-50%) scale(0);
-            opacity: 0;
-            transition: all 0.2s ease-out;
-        }
-
-        .dropdown-menu a:hover::before {
-            transform: translateY(-50%) scale(1);
-            opacity: 1;
-        }
-
-        .dropdown-menu a:not(:last-child) {
-            border-bottom: 1px solid rgba(252, 128, 25, 0.1);
-        }
-
-        @media (max-width: 768px) {
-            .desktop-menu {
-                display: none;
-            }
-
-            .mobile-menu {
-                display: block;
-                position: relative;
-            }
-
-            .mobile-menu.active .dropdown-menu {
-                display: block;
-            }
-        }
-
         /* Dashboard Content Styles */
         .main-content {
             margin-top: 80px;
             padding: 30px;
+        }
+
+        /* Menu Management Section */
+        .menu-management {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+        }
+
+        .menu-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .menu-header h2 {
+            color: #333;
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .action-buttons a {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .add-item-btn {
+            background: #fc8019;
+            color: white;
+        }
+
+        .add-table-btn {
+            background: #fff3e0;
+            color: #fc8019;
+            border: 1px solid #fc8019;
+        }
+
+        .action-buttons a:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .add-item-btn:hover {
+            background: #e67215;
+        }
+
+        .add-table-btn:hover {
+            background: #ffe4cc;
         }
 
         /* Insights Section */
@@ -290,155 +151,115 @@
             color: #d32f2f;
         }
 
-        /* Menu Management Section */
-        .menu-management {
+        /* Charts Section */
+        .charts-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .chart-card {
             background: white;
-            border-radius: 12px;
             padding: 25px;
+            border-radius: 12px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
         }
 
-        .menu-header {
+        .chart-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
 
-        .menu-header h2 {
+        .chart-title {
             color: #333;
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 600;
         }
 
-        .action-buttons {
-            display: flex;
-            gap: 15px;
-        }
-
-        .action-buttons a {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 12px 20px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-size: 15px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
-
-        .add-item-btn {
-            background: #fc8019;
-            color: white;
-        }
-
-        .add-table-btn {
-            background: #fff3e0;
-            color: #fc8019;
-        }
-
-        .action-buttons a:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-
-        .add-item-btn:hover {
-            background: #e67215;
-        }
-
-        .add-table-btn:hover {
-            background: #ffe4cc;
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
         }
 
         /* Responsive Adjustments */
         @media (max-width: 768px) {
             .main-content {
-                padding: 20px;
+                padding: 15px;
+            }
+
+            .menu-header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+
+            .action-buttons {
+                width: 100%;
+                flex-direction: column;
+            }
+
+            .action-buttons a {
+                width: 100%;
+                justify-content: center;
             }
 
             .insights {
                 grid-template-columns: 1fr;
             }
 
-            .menu-header {
-                flex-direction: column;
-                gap: 15px;
-                align-items: stretch;
-            }
-
-            .action-buttons {
-                flex-direction: column;
-            }
-
-            .action-buttons a {
-                justify-content: center;
+            .charts-section {
+                grid-template-columns: 1fr;
             }
         }
 
         @media (max-width: 480px) {
-            .insight-card {
-                padding: 20px;
+            .main-content {
+                padding: 10px;
+            }
+
+            .menu-management,
+            .insight-card,
+            .chart-card {
+                padding: 15px;
             }
 
             .insight-icon {
-                width: 50px;
-                height: 50px;
-                font-size: 20px;
+                width: 45px;
+                height: 45px;
+                font-size: 18px;
             }
 
             .insight-value {
-                font-size: 20px;
+                font-size: 18px;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="secondary-nav">
-        <div class="nav-content">
-            <div class="nav-left">
-                <a href="{% url 'joo:restaurant_dashboard' %}" class="brand">
-                    <div class="profile-pic-placeholder">
-                        <i class="fas fa-store"></i>
-                    </div>
-                    <div class="partner-details">
-                        <span class="partner-label">Restaurant Partner</span>
-                        <span class="restaurant-name">{{ request.session.restaurant_name }}</span>
-                    </div>
-                </a>
-            </div>
-            <div class="nav-right">
-                <div class="desktop-menu">
-                    <a href="{% url 'joo:update_restaurant_profile' %}">Edit Profile</a>
-                    <a href="{% url 'joo:restaurant_food_items' %}">Food Items</a>
-                    <a href="{% url 'joo:restaurant_dining_tables' %}">Dining Tables</a>
-                    <a href="{% url 'joo:restaurant_booking_history' %}" class="nav-link">
-                        <i class="fas fa-history"></i>
-                        <span>Orders & Bookings History</span>
+    {% include 'partner/restaurant/header.html' %}
+
+    <div class="main-content">
+        <!-- Menu Management Section -->
+        <div class="menu-management">
+            <div class="menu-header">
+                <h2>Menu Management</h2>
+                <div class="action-buttons">
+                    <a href="{% url 'joo:restaurant_food_items' %}" class="add-item-btn">
+                        <i class="fas fa-utensils"></i>
+                        Manage Food Items
                     </a>
-                    <a href="{% url 'joo:restaurant_logout' %}">Logout</a>
-                </div>
-                <div class="mobile-menu">
-                    <button class="menu-toggle">
-                        <i class="fas fa-bars"></i>
-                    </button>
-                    <div class="dropdown-menu">
-                        <a href="{% url 'joo:update_restaurant_profile' %}">Edit Profile</a>
-                        <a href="{% url 'joo:restaurant_food_items' %}">Food Items</a>
-                        <a href="{% url 'joo:restaurant_dining_tables' %}">Dining Tables</a>
-                        <a href="{% url 'joo:restaurant_booking_history' %}" class="nav-link">
-                            <i class="fas fa-history"></i>
-                            <span>Orders & Bookings History</span>
-                        </a>
-                        <a href="{% url 'joo:restaurant_logout' %}">Logout</a>
-                    </div>
+                    <a href="{% url 'joo:restaurant_dining_tables' %}" class="add-table-btn">
+                        <i class="fas fa-chair"></i>
+                        Manage Tables
+                    </a>
                 </div>
             </div>
         </div>
-    </nav>
 
-    <div class="main-content">
         <!-- Insights Section -->
         <div class="insights">
             <div class="insight-card">
@@ -486,52 +307,202 @@
             </div>
         </div>
 
-        <div class="menu-management">
-            <div class="menu-header">
-                <h2>Menu Management</h2>
-                <div class="action-buttons">
-                    <a href="{% url 'joo:restaurant_food_items' %}" class="add-item-btn">
-                        <i class="fas fa-utensils"></i>
-                        Manage Food Items
-                    </a>
-                    <a href="{% url 'joo:restaurant_dining_tables' %}" class="add-table-btn">
-                        <i class="fas fa-chair"></i>
-                        Manage Tables
-                    </a>
+        <!-- Charts Section -->
+        <div class="charts-section">
+            <!-- Daily Orders Chart -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3 class="chart-title">Daily Orders Overview</h3>
+                </div>
+                <div class="chart-container">
+                    <canvas id="ordersChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Revenue by Category Chart -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3 class="chart-title">Revenue by Category</h3>
+                </div>
+                <div class="chart-container">
+                    <canvas id="revenueChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Popular Items Chart -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3 class="chart-title">Top Selling Items</h3>
+                </div>
+                <div class="chart-container">
+                    <canvas id="popularItemsChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Ratings Distribution Chart -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3 class="chart-title">Customer Ratings Distribution</h3>
+                </div>
+                <div class="chart-container">
+                    <canvas id="ratingsChart"></canvas>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const menuToggle = document.querySelector('.menu-toggle');
-            const mobileMenu = document.querySelector('.mobile-menu');
+        // Chart.js Configuration
+        Chart.defaults.font.family = "'Arial', sans-serif";
+        Chart.defaults.color = '#666';
+        Chart.defaults.plugins.legend.position = 'bottom';
 
-            // Toggle mobile menu
-            menuToggle.addEventListener('click', function(e) {
-                e.stopPropagation();
-                mobileMenu.classList.toggle('active');
-                
-                // Add rotation to the hamburger icon
-                this.style.transform = mobileMenu.classList.contains('active') 
-                    ? 'rotate(90deg)' 
-                    : 'rotate(0deg)';
-            });
-
-            // Close menu when clicking outside
-            document.addEventListener('click', function(e) {
-                if (!mobileMenu.contains(e.target)) {
-                    mobileMenu.classList.remove('active');
-                    menuToggle.style.transform = 'rotate(0deg)';
+        // Daily Orders Chart
+        const ordersCtx = document.getElementById('ordersChart').getContext('2d');
+        new Chart(ordersCtx, {
+            type: 'line',
+            data: {
+                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                datasets: [{
+                    label: 'Orders',
+                    data: [35, 42, 38, 45, 40, 50, 45],
+                    borderColor: '#fc8019',
+                    backgroundColor: 'rgba(252, 128, 25, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            display: true,
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
                 }
-            });
+            }
+        });
 
-            // Prevent dropdown from closing when clicking inside it
-            const dropdown = document.querySelector('.dropdown-menu');
-            dropdown.addEventListener('click', function(e) {
-                e.stopPropagation();
-            });
+        // Revenue by Category Chart
+        const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+        new Chart(revenueCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Main Course', 'Desserts', 'Beverages', 'Starters', 'Others'],
+                datasets: [{
+                    data: [35, 20, 15, 20, 10],
+                    backgroundColor: [
+                        '#fc8019',
+                        '#4CAF50',
+                        '#2196F3',
+                        '#FFC107',
+                        '#9C27B0'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right'
+                    }
+                }
+            }
+        });
+
+        // Popular Items Chart
+        const popularItemsCtx = document.getElementById('popularItemsChart').getContext('2d');
+        new Chart(popularItemsCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Biryani', 'Butter Chicken', 'Naan', 'Ice Cream', 'Pizza'],
+                datasets: [{
+                    label: 'Orders',
+                    data: [150, 120, 100, 80, 60],
+                    backgroundColor: '#fc8019'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            display: true,
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+
+        // Ratings Distribution Chart
+        const ratingsCtx = document.getElementById('ratingsChart').getContext('2d');
+        new Chart(ratingsCtx, {
+            type: 'bar',
+            data: {
+                labels: ['5 Stars', '4 Stars', '3 Stars', '2 Stars', '1 Star'],
+                datasets: [{
+                    label: 'Number of Ratings',
+                    data: [50, 30, 15, 5, 2],
+                    backgroundColor: [
+                        '#4CAF50',
+                        '#8BC34A',
+                        '#FFC107',
+                        '#FF9800',
+                        '#f44336'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            display: true,
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
         });
     </script>
 </body>

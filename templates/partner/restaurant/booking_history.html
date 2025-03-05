@@ -18,81 +18,6 @@
             background: #f8f9fa;
         }
 
-        /* Navigation Styles */
-        .secondary-nav {
-            background-color: #fc8019;
-            padding: 15px 0;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
-            border-bottom: 1px solid #e8e8e8;
-        }
-        
-        .nav-content {
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 20px;
-            width: 100%;
-        }
-
-        .brand {
-            color: white;
-            font-size: 1.8rem;
-            font-weight: bold;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .profile-pic-placeholder {
-            width: 45px;
-            height: 45px;
-            background: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #fc8019;
-            font-size: 20px;
-            border: 2px solid white;
-        }
-
-        .partner-details {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .partner-label {
-            font-size: 12px;
-            opacity: 0.9;
-            color: white;
-        }
-
-        .restaurant-name {
-            font-size: 16px;
-            font-weight: 500;
-            color: white;
-        }
-
-        .desktop-menu {
-            display: flex;
-            gap: 25px;
-        }
-
-        .desktop-menu a {
-            color: white;
-            text-decoration: none;
-            font-size: 1rem;
-            position: relative;
-            padding: 5px 0;
-            margin: 0 5px;
-        }
-
         /* Main Content Styles */
         .container {
             max-width: 1200px;
@@ -232,75 +157,6 @@
             box-shadow: none;
         }
 
-        /* Mobile Navigation Styles */
-        @media (max-width: 768px) {
-            .nav-content {
-                position: relative;
-            }
-
-            .desktop-menu {
-                display: none;
-                position: absolute;
-                top: 100%;
-                right: 0;
-                background: white;
-                border-radius: 8px;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-                padding: 10px 0;
-                min-width: 200px;
-                margin-top: 10px;
-            }
-
-            .desktop-menu.active {
-                display: block;
-            }
-
-            .desktop-menu a {
-                color: #333;
-                padding: 12px 20px;
-                display: block;
-                margin: 0;
-            }
-
-            .desktop-menu a:hover {
-                background: #f8f8f8;
-            }
-
-            .desktop-menu a.active {
-                color: #fc8019;
-                background: #fff3e6;
-            }
-
-            .menu-toggle {
-                display: block;
-                background: none;
-                border: none;
-                color: white;
-                font-size: 24px;
-                cursor: pointer;
-                padding: 5px;
-            }
-
-            /* Brand and Profile Section */
-            .brand {
-                font-size: 1.4rem;
-            }
-
-            .profile-pic-placeholder {
-                width: 35px;
-                height: 35px;
-                font-size: 16px;
-            }
-
-            .partner-label {
-                font-size: 11px;
-            }
-
-            .restaurant-name {
-                font-size: 14px;
-            }
-        }
-
         /* Mobile Content Styles */
         @media (max-width: 768px) {
             .container {
@@ -372,44 +228,10 @@
                 justify-content: center;
             }
         }
-
-        /* Add dropdown arrow to menu */
-        .desktop-menu::before {
-            content: '';
-            position: absolute;
-            top: -8px;
-            right: 15px;
-            border-left: 8px solid transparent;
-            border-right: 8px solid transparent;
-            border-bottom: 8px solid white;
-        }
     </style>
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="secondary-nav">
-        <div class="nav-content">
-            <a href="{% url 'joo:restaurant_dashboard' %}" class="brand">
-                <div class="profile-pic-placeholder">
-                    <i class="fas fa-store"></i>
-                </div>
-                <div class="partner-details">
-                    <span class="partner-label">Restaurant Partner</span>
-                    <span class="restaurant-name">{{ restaurant.restaurant_name }}</span>
-                </div>
-            </a>
-            <button class="menu-toggle" style="display: none;">
-                <i class="fas fa-bars"></i>
-            </button>
-            <div class="desktop-menu">
-                <a href="{% url 'joo:update_restaurant_profile' %}">Edit Profile</a>
-                <a href="{% url 'joo:restaurant_food_items' %}">Food Items</a>
-                <a href="{% url 'joo:restaurant_dining_tables' %}">Dining Tables</a>
-                <a href="{% url 'joo:restaurant_booking_history' %}" class="active">Orders & Bookings</a>
-                <a href="{% url 'joo:restaurant_logout' %}">Logout</a>
-            </div>
-        </div>
-    </nav>
+    {% include 'partner/restaurant/header.html' %}
 
     <!-- Main Content -->
     <div class="container">
@@ -418,7 +240,7 @@
         <!-- Debug information -->
         {% if debug %}
         <div class="debug-info" style="background: #f5f5f5; padding: 10px; margin-bottom: 20px;">
-            <p>Current Restaurant: {{ request.session.restaurant_name }}</p>
+            <p>Current Restaurant: {{ restaurant_name }}</p>
             <p>Number of Orders: {{ joo_orders|length }}</p>
             {% if joo_orders %}
                 <p>Order Types:</p>
@@ -442,8 +264,6 @@
                     <tr>
                         <th>Order ID</th>
                         <th>Customer Email</th>
-                        <th>Restaurant ID</th>
-                        <th>Restaurant</th>
                         <th>Type</th>
                         <th>Date & Time</th>
                         <th>Status</th>
@@ -453,47 +273,47 @@
                 <tbody>
                     {% if joo_orders %}
                         {% for order in joo_orders %}
-                        <tr class="booking-row" data-type="{{ order.order_type }}">
-                            <td>{{ order.order_id }}</td>
-                            <td>{{ order.customer_email }}</td>
-                            <td>{{ order.restaurant_id }}</td>
-                            <td>{{ order.restaurant_name }}</td>
-                            <td>
-                                {% if order.order_type == 'food' %}
-                                    Food Order
-                                {% elif order.order_type == 'dining' %}
-                                    Table Booking
-                                {% endif %}
-                            </td>
-                            <td>{{ order.booking_date|date:"M d, Y H:i" }}</td>
-                            <td>
-                                <span class="badge badge-{{ order.status|lower }}">
-                                    {{ order.status|title }}
-                                </span>
-                            </td>
-                            <td>
-                                {% if order.status == 'pending' and order.order_type == 'dining' %}
-                                <div class="btn-group">
-                                    <button class="btn btn-success btn-sm" 
-                                            onclick="updateStatus('{{ order.order_id }}', 'completed')"
-                                            title="Mark as Completed">
-                                        <i class="fas fa-check"></i> Complete
-                                    </button>
-                                    <button class="btn btn-danger btn-sm" 
-                                            onclick="updateStatus('{{ order.order_id }}', 'cancelled')"
-                                            title="Mark as Cancelled">
-                                        <i class="fas fa-times"></i> Cancel
-                                    </button>
-                                </div>
-                                {% elif order.order_type == 'food' %}
-                                <span class="text-muted">-</span>
-                                {% endif %}
-                            </td>
-                        </tr>
+                            {% if order.restaurant_name == restaurant_name %}
+                            <tr class="booking-row" data-type="{{ order.order_type }}">
+                                <td>{{ order.order_id }}</td>
+                                <td>{{ order.customer_email }}</td>
+                                <td>
+                                    {% if order.order_type == 'food' %}
+                                        Food Order
+                                    {% elif order.order_type == 'dining' %}
+                                        Table Booking
+                                    {% endif %}
+                                </td>
+                                <td>{{ order.booking_date|date:"M d, Y H:i" }}</td>
+                                <td>
+                                    <span class="badge badge-{{ order.status|lower }}">
+                                        {{ order.status|title }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if order.status == 'pending' and order.order_type == 'dining' %}
+                                    <div class="btn-group">
+                                        <button class="btn btn-success btn-sm" 
+                                                onclick="updateStatus('{{ order.order_id }}', 'completed')"
+                                                title="Mark as Completed">
+                                            <i class="fas fa-check"></i> Complete
+                                        </button>
+                                        <button class="btn btn-danger btn-sm" 
+                                                onclick="updateStatus('{{ order.order_id }}', 'cancelled')"
+                                                title="Mark as Cancelled">
+                                            <i class="fas fa-times"></i> Cancel
+                                        </button>
+                                    </div>
+                                    {% elif order.order_type == 'food' %}
+                                    <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endif %}
                         {% endfor %}
                     {% else %}
                         <tr>
-                            <td colspan="8" class="text-center">No orders found</td>
+                            <td colspan="6" class="text-center">No orders found for {{ restaurant_name }}</td>
                         </tr>
                     {% endif %}
                 </tbody>
@@ -533,36 +353,6 @@
 
             // Trigger click on "Food Orders" button by default
             document.querySelector('[data-type="food"]').click();
-
-            // Add mobile menu toggle functionality
-            const menuToggle = document.querySelector('.menu-toggle');
-            const desktopMenu = document.querySelector('.desktop-menu');
-
-            menuToggle.addEventListener('click', function(e) {
-                e.stopPropagation();
-                desktopMenu.classList.toggle('active');
-            });
-
-            // Close menu when clicking outside
-            document.addEventListener('click', function(e) {
-                if (!desktopMenu.contains(e.target) && !menuToggle.contains(e.target)) {
-                    desktopMenu.classList.remove('active');
-                }
-            });
-
-            // Show/hide menu toggle based on screen size
-            function updateMenuToggle() {
-                if (window.innerWidth <= 768) {
-                    menuToggle.style.display = 'block';
-                } else {
-                    menuToggle.style.display = 'none';
-                    desktopMenu.classList.remove('active');
-                }
-            }
-
-            // Initial check and listen for window resize
-            updateMenuToggle();
-            window.addEventListener('resize', updateMenuToggle);
         });
 
         function updateStatus(bookingId, status) {
@@ -574,7 +364,7 @@
                         'X-CSRFToken': '{{ csrf_token }}'
                     },
                     body: JSON.stringify({
-                        booking_id: bookingId,
+                        order_id: bookingId,
                         status: status
                     })
                 })
