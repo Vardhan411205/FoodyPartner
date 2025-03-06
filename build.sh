@@ -25,7 +25,7 @@ echo "Running database migrations..."
 python manage.py makemigrations
 python manage.py migrate
 python manage.py migrate --database=default
-python manage.py migrate --database=user
+python manage.py migrate --database=items
 
 # Clean up cache
 echo "Cleaning up cache files..."
