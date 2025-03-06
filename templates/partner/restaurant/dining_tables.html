@@ -159,7 +159,7 @@
         .form-group select:focus {
             border-color: #fc8019;
         }
-
+        
         .modal {
             display: none;
             position: fixed;
@@ -343,12 +343,12 @@
                 border-radius: 0;
             }
 
-            .tables-table {
+        .tables-table {
                 font-size: 14px;
-            }
+        }
 
-            .tables-table th,
-            .tables-table td {
+        .tables-table th,
+        .tables-table td {
                 padding: 10px;
             }
 
@@ -425,12 +425,12 @@
                 <div class="header-info">
                     <h2>Dining Tables</h2>
                     <p class="restaurant-name">{{ request.session.restaurant_name }}</p>
-                </div>
+                    </div>
                 <button class="add-table-btn" onclick="openModal()">
                     <i class="fas fa-plus"></i>
                     Add New Table
-                </button>
-            </div>
+                    </button>
+                    </div>
 
             <div id="alert" class="alert"></div>
 
@@ -452,9 +452,9 @@
                         <!-- Tables will be dynamically added here -->
                     </tbody>
                 </table>
+                </div>
             </div>
         </div>
-    </div>
 
     <!-- Add/Edit Table Modal -->
     <div id="tableModal" class="modal">
@@ -464,52 +464,52 @@
                 <button class="close-btn" onclick="closeModal()">&times;</button>
             </div>
             <form id="tableForm">
-                {% csrf_token %}
+                    {% csrf_token %}
                 <input type="hidden" id="tableId" name="table_id">
-                <div class="form-group">
+                        <div class="form-group">
                     <label for="tableName">Table Number</label>
                     <input type="text" id="tableName" name="table_number" required>
-                </div>
-                <div class="form-group">
-                    <label for="category">Category</label>
-                    <select id="category" name="category" required>
-                        <option value="regular">Regular</option>
-                        <option value="family">Family</option>
-                        <option value="vip">VIP</option>
-                    </select>
-                </div>
-                <div class="form-group">
+                        </div>
+                        <div class="form-group">
+                            <label for="category">Category</label>
+                            <select id="category" name="category" required>
+                                <option value="regular">Regular</option>
+                                <option value="family">Family</option>
+                                <option value="vip">VIP</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
                     <label for="capacity">Seating Capacity</label>
                     <input type="number" id="capacity" name="seating_capacity" min="1" required>
-                </div>
-                <div class="form-group">
-                    <label for="price">Price (4 Hours)</label>
+                        </div>
+                        <div class="form-group">
+                            <label for="price">Price (4 Hours)</label>
                     <input type="number" id="price" name="price" min="0" step="0.01" required>
-                </div>
-                <div class="form-group">
-                    <label for="status">Status</label>
-                    <select id="status" name="status" required>
-                        <option value="available">Available</option>
-                        <option value="occupied">Occupied</option>
-                        <option value="reserved">Reserved</option>
+                        </div>
+                        <div class="form-group">
+                            <label for="status">Status</label>
+                            <select id="status" name="status" required>
+                                <option value="available">Available</option>
+                                <option value="occupied">Occupied</option>
+                                <option value="reserved">Reserved</option>
                         <option value="maintenance">Under Maintenance</option>
-                    </select>
-                </div>
+                            </select>
+                        </div>
                 <div class="form-group">
                     <label for="rating">Rating</label>
                     <input type="number" id="rating" name="rating" min="0" max="5" step="0.1" value="0" required>
-                </div>
+                    </div>
                 <div class="form-group">
                     <label for="imageUrl">Image URL</label>
                     <input type="url" id="imageUrl" name="image_url" placeholder="Enter table image URL" required>
-                </div>
+                        </div>
                 <div class="modal-footer">
                     <button type="button" class="cancel-btn" onclick="closeModal()">Cancel</button>
                     <button type="submit" class="save-btn">Save Table</button>
-                </div>
-            </form>
-        </div>
-    </div>
+                    </div>
+                </form>
+            </div>
+            </div>
 
     <script>
         let currentTableId = null;
@@ -566,28 +566,28 @@
                 <tr data-table-id="${table.id}">
                     <td class="table-image">
                         <img src="${table.image_url}" alt="Table ${table.table_number}" style="width: 100px; height: 60px; object-fit: cover; border-radius: 6px;">
-                    </td>
+                            </td>
                     <td class="table-name">${table.table_number}</td>
                     <td data-category="${table.category}">${categoryText}</td>
                     <td data-capacity="${table.seating_capacity}">${table.seating_capacity} Seats</td>
                     <td data-price="${table.price}">₹${table.price}</td>
                     <td>
                         <span class="status-badge ${statusClass}" data-status="${table.status}">${statusText}</span>
-                    </td>
+                            </td>
                     <td data-rating="${table.rating}">
                         <i class="fas fa-star" style="color: #ffc107;"></i> ${table.rating}
-                    </td>
-                    <td>
-                        <div class="action-buttons">
+                            </td>
+                            <td>
+                                <div class="action-buttons">
                             <button class="edit-btn" onclick="openModal(${table.id})" title="Edit Table">
                                 <i class="fas fa-edit"></i> Edit
-                            </button>
+                                    </button>
                             <button class="delete-btn" onclick="deleteTable(${table.id})" title="Delete Table">
                                 <i class="fas fa-trash"></i> Delete
-                            </button>
-                        </div>
-                    </td>
-                </tr>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
             `;
         }
 
@@ -647,10 +647,10 @@
             }
             
             fetch('{% url "joo:restaurant_dining_tables" %}', {
-                method: 'POST',
+                    method: 'POST',
                 body: JSON.stringify(tableData),
-                headers: {
-                    'Content-Type': 'application/json',
+                    headers: {
+                        'Content-Type': 'application/json',
                     'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
                 },
                 credentials: 'same-origin'
@@ -689,10 +689,10 @@
                 })
                 .then(response => response.json())
                 .then(data => {
-                    if (data.status === 'success') {
+                if (data.status === 'success') {
                         showAlert('success', 'Table deleted successfully!');
                         loadTables();
-                    } else {
+                } else {
                         throw new Error(data.message || 'Failed to delete table');
                     }
                 })

@@ -1083,8 +1083,8 @@ def restaurant_booking_history(request):
     try:
         restaurant_name = request.session['restaurant_name']
         
-        # Use the 'user' database connection where joo_order table exists
-        with connections['user'].cursor() as cursor:
+        # Use the 'items' database connection where joo_order table exists
+        with connections['items'].cursor() as cursor:
             # Get the orders using the restaurant name from session
             query = """
                 SELECT order_id, customer_email, restaurant_id, 
@@ -1124,7 +1124,7 @@ def update_booking_status(request):
             order_id = data.get('order_id')
             status = data.get('status')
             
-            order = Order.objects.using('user').get(order_id=order_id)
+            order = Order.objects.using('items').get(order_id=order_id)
             order.status = status
             order.save()
             
@@ -1360,7 +1360,7 @@ def venue_bookings(request):
     try:
         venue = VenuePartner.objects.get(id=request.session['venue_id'])
         # Use Order model and filter for venue orders by restaurant_name and order_type
-        bookings = Order.objects.using('user').filter(
+        bookings = Order.objects.using('items').filter(
             order_type='venue',  # Changed from 'table' to 'venue'
             restaurant_name=venue.venue_name  # Match by venue name instead of ID
         ).order_by('-booking_date')
