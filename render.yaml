@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: joo
+    env: python
+    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py safe_migrate
+    startCommand: gunicorn fm.wsgi:application
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.6
+      - key: WEB_CONCURRENCY
+        value: 4 
