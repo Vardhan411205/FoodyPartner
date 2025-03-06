@@ -39,7 +39,7 @@ class DatabaseRouter:
         Make sure the auth and contenttypes apps only appear in the
         'default' database.
         """
-        if app_label in ['auth', 'contenttypes', 'sessions', 'admin'] or app_label == 'sessions':
+        if app_label in ['auth', 'contenttypes', 'sessions', 'admin']:
             return db == 'default'
         if model_name in ['venuepartner', 'restaurantpartner', 'fooditem', 'diningtable', 'deliverypartner', 'otpverification', 'resetpassword']:  # Partner, auth, and related migrations go to default
             return db == 'default'
